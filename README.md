@@ -7,4 +7,4 @@ World Energy Use:I am curious to
 ​https://www.eia.gov/international/data/world
 
 World Population:
-https://data.worldbank.org/indicator/sp.pop.totl​ 
+https://data.worldbank.org/indicator/sp.pop.totl
