@@ -88,10 +88,13 @@ plt.style.use('ggplot')
 #Set parameters
 start_year = 1980
 end_year = 2017
-years_to_int = {str(year): year for year in range(start_year, end_year + 1)}
+
+def years_to_int(first_year = start_year, last_year = end_year):
+    years_to_int = {str(year): year for year in range(first_year, last_year + 1)}
+    return years_to_int
 
 #This number sets the number of countries to analyze per top in each category.
-countries_to_analyze = 20 + 1
+countries_to_analyze = 20
 
 '''
 -----------------------------------------------------------------
@@ -100,7 +103,7 @@ Import electricity generation data and clean it
 '''
 energy_data = pd.read_csv('data/INT-Export-04-05-2020_00-10-38.csv', header=1)
 energy_data.rename(columns={'Unnamed: 1': 'Energy Type', 'API': 'Country Code'}, inplace = True)
-energy_data.rename(columns = years_to_int, inplace=True)
+energy_data.rename(columns = years_to_int(), inplace=True)
 # 2018 has a lot of missing data
 energy_data.drop('2018', axis=1, inplace=True)
 
@@ -151,12 +154,13 @@ Import UN HDI data
 -----------------------------------------------------------------
 '''
 HDI_data = pd.read_csv('data/HDI.csv', nrows=190)
-HDI_data.rename(columns=years_to_int, inplace=True)
+HDI_data.rename(columns=years_to_int(1990, 2018), inplace=True)
 HDI_data.drop(0, inplace = True)
 HDI_data['Country'] = HDI_data['Country'].str.lstrip()
 HDI_data.drop([HDI_data.columns[x] for x in range(
     3, len(HDI_data.columns), 2)], axis=1, inplace=True)
-developed = HDI_data.sort_values(2017, ascending=False)['Country'][:20].reset_index(drop = True)
+HDI_data.iloc[:, 0] = HDI_data.iloc[:, 0].astype('int')
+developed = HDI_data.sort_values('HDI Rank')['Country'][:countries_to_analyze].reset_index(drop = True)
 '''
 -----------------------------------------------------------------
 Import population data and clean it
@@ -164,7 +168,8 @@ Import population data and clean it
 '''
 
 pop_data = pd.read_csv('data/API_SP.POP.csv', header=4)
-pop_data.rename(columns=years_to_int, inplace=True)
+pop_data_min_year = 1960
+pop_data.rename(columns=years_to_int(pop_data_min_year), inplace=True)
 
 pop_data.drop(['Unnamed: 64', 'Indicator Name',
                       'Indicator Code', '2018', '2019'], axis=1, inplace=True)
@@ -195,7 +200,7 @@ Highest population dataset determined here
 '''
 high_pop = pop_data.sort_values(start_year,ascending = False).copy()[1: countries_to_analyze]
 
-#Percentage of renewable electricity of whole world
+#Percentage of renewable electricity of whole world aggregated
 percentage = energy_data.iloc[4][2:].astype(
     np.float) / energy_data.iloc[0][2:].astype(np.float)
 plt.scatter(percentage.index, percentage)
@@ -212,7 +217,7 @@ if show_plot == 'T':
     world_fig.show()
 
 #World Population
-make_plots(pop_data.sum().loc[years_to_int.values()])
+make_plots(pop_data.sum().loc[years_to_int(pop_data_min_year).values()])
 
 # Plot of top 20 most developed countries renewable energies
 developed = pd.DataFrame(developed).merge(energy_data)
@@ -224,4 +229,4 @@ fig, ax = plt.subplots(1,1, figsize = (12,6))
 #lt.plot(developed_energy.iloc[3, 1:].index[1:], developed_energy.iloc[3, 1:].values[1:])
 #if __name__ == '__main__':
 #    print(energy_data)
-pop_data.sum().loc[years_to_int.values()]
+pop_data.sum().loc[years_to_int(pop_data_min_year).values()]
