@@ -47,18 +47,18 @@ class analysis(object):
     def show_countries(self, for_analysis = 'T'):
         return self.countries_analyzed if for_analysis == 'T' else set(self.data.loc[:,'Country'])
 
-    #Check that the aggregated columns equal the sum of the subsets
-    def sanity_check(self, country = 'Norway', start_year= 1980, end_year = 2017):
+    #Check that the aggregated rows equal the sum of the subset rows
+    def check_aggregates(self, country = 'Norway', start_year= 1980, end_year = 2017):
         print('Checking Renewable subrows = renewable total row')
         for each in range(start_year, end_year + 1):
-            if round(energy_data[energy_data['Country'] == country].loc[:,each].iloc[4:10].sum(),3) != round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[3], 3) :
-                print(each)
+            if round(energy_data[energy_data['Country'] == country].loc[:,each].iloc[4:10].sum(),3) != round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[3], 3):
+                print(each,' has unequal values')
                 break
         print('Checked Renewable subrows = renewable total row')
         print('Checking all subrows =  total row')
         for each in range(start_year, end_year + 1):
             if round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[[1, 2, 3, 10]].sum(), 3) != round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[0], 3):
-                print(each)
+                print(each,' has unequal values')
                 break
         print('Checked all subrows=total row')
 
@@ -113,11 +113,17 @@ end_year = 2017
 years_analyzed = range(start_year, end_year + 1)
 
 def combine_countries(df, combine_list, into_country):
-    into_country_data = df[df['Country'] == into_country].loc[:, years_analyzed].to_numpy()
+    into_data = df[df['Country'] == into_country].loc[:, years_analyzed]
+    into_rows = into_data.index
+    into_country_data = into_data.to_numpy()
     for country in combine_list:
         into_country_data += df[df['Country'] == country].loc[:, years_analyzed].to_numpy()
-        df[df['Country'] == country].loc[:, years_analyzed] = 0
+        row_indexes = df[df['Country'] == country].loc[:, years_analyzed].index
+        df.loc[row_indexes, years_analyzed] = 0
+    df.loc[into_rows, years_analyzed] = into_country_data
     return df
+
+    #847 879
 
 # def col_to_num(df, col1, col2 = None):
 #     for col in df.iloc[:, col1:col2]:
@@ -203,9 +209,10 @@ countries = pd.DataFrame(country_code).join(countries)
 countries.rename(columns ={'Energy Type': 'Country'}, inplace = True)
 energy_data.merge(countries)
 
-#Replace Country codes with country names
+#Replace Country codes with country names, combines split countries
 energy_data = energy_data.iloc[:, :1].merge(countries).join(energy_data.iloc[:, 1:])
 energy_data.drop('Country Code', axis=1, inplace = True)
+combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
 '''
 -----------------------------------------------------------------
 Import UN HDI data
@@ -218,6 +225,8 @@ HDI_data['Country'] = HDI_data['Country'].str.lstrip()
 HDI_data.drop([HDI_data.columns[x] for x in range(
     3, len(HDI_data.columns), 2)], axis=1, inplace=True)
 HDI_data.iloc[:, 0] = HDI_data.iloc[:, 0].astype('int')
+HDI_data['Country'].replace(
+    'Hong Kong, China (SAR)', "Hong Kong", inplace=True)
 developed_data = HDI_data.sort_values('HDI Rank')['Country'][:countries_to_analyze].reset_index(drop = True)
 developed_countries = list(developed_data)
 '''
@@ -283,31 +292,17 @@ make_plots(pop_data.sum().loc[years_to_int(pop_data_min_year).values()])
 developed_data = pd.DataFrame(developed_data).merge(energy_data)
 fig, ax = plt.subplots(1,1, figsize = (12,6))
 
-# Norway_reuse = developed_energy.
-# ax.plot(developed_energy.columns, )
 
 #lt.plot(developed_energy.iloc[3, 1:].index[1:], developed_energy.iloc[3, 1:].values[1:])
 if __name__ == '__main__':
 #    print(energy_data)
 #pop_data.sum().loc[years_to_int(pop_data_min_year).values()]
-    Development_Analysis = analysis(energy_data, title = 'Developed Countries')
-    Development_Analysis.add_countries(['Norway',
-                                       'Switzerland',
-                                       'Ireland',
-                                       'Hong Kong',
-                                       'Australia',
-                                       'Iceland',
-                                       'Sweden',
-                                       'Singapore',
-                                       'Netherlands',
-                                       'Denmark',
-                                       'Finland',
-                                       'Canada',
-                                       'New Zealand',
-                                       'United Kingdom',
-                                       'United States',
-                                       'Belgium',
-                                       'Liechtenstein',
-                                       'Japan',
-                                       'Austria'])
-    Development_Analysis.plot_data()   # 'Germany'
+
+
+    Development_Analysis = analysis(energy_data, title = 'Top Developed Countries')
+    Development_Analysis.add_countries(developed_countries)
+    Development_Analysis.plot_data()   
+
+
+    #Population_Analysis = analysis(energy_data, title='Top Populated Countries')
+    #Population_Analysis.add_countries(list(high_pop['Country'])) Need to fix divide by 0
