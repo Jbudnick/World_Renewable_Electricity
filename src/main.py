@@ -1,17 +1,12 @@
-#Functions : Combine East and West Germany into Germany and add to developed plots
-
 '''
-To get year columns mapped as int:
-    dtype in read csv, import dictionary with column names
+
+Null hypo: p0 <= pA
+Alt hypo pA > p0
 
 Bring in list of developed vs developing countries
 color code 
 
 To Do ++ :
-Left Justify Energy Type column
-Tuesday:
-Finish Hypo Test
-plots
 Convert datasets into objects?
 
 Wednesday
@@ -19,22 +14,25 @@ MVP+ Stuff
 
 Thursday:
 Clean Code, Work on readme
-
-To Do:
-Make separate DataFrame for energy use - only data for renewable vs non renewable, add to highest population table
-hypo test
 '''
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 plt.close('all')
+
+#Year parameters - must be between 1980 and 2017 (inclusive)
+start_year = 1980
+end_year = 2017
+years_analyzed = range(start_year, end_year + 1)
+
+countries_to_analyze = 35
 
 # Create dataset class, convert datasets to objects, cleaning processes to methods
 # 
 # class dataset():
 #     def __init__(self,data):
 #         self.data
-
 
 class analysis(object):
     def __init__(self, data, title):
@@ -68,23 +66,77 @@ class analysis(object):
             if country not in set(self.data['Country']):
                 print(country, 'is not in energy data and has been skipped.')
                 continue
+
             renewable_vals = self.data[(self.data['Country'] == country) & (self.data['Energy Type'] == '3.Renewables (billion Kwh)')]
-            total_generation_vals = self.data[(self.data['Country'] == country) & (
-                self.data['Energy Type'] == 'Generation (billion Kwh)')]
-            renew_proportions = renewable_vals.iloc[:, 2:].to_numpy().flatten() / total_generation_vals.iloc[:, 2:].to_numpy().flatten()
+
+            total_gen = self.data[(self.data['Country'] == country) & (
+                self.data['Energy Type'] == 'Generation (billion Kwh)')].iloc[0, 2:].to_numpy()
+
+            hydro_storage = self.data[(self.data['Country'] == country) & (
+                self.data['Energy Type'] == '4.Hydroelectric pumped storage (billion Kwh)')].iloc[0,2:].to_numpy()
+
+            total_generation_vals = total_gen - hydro_storage
+            renewable_vals = renewable_vals.iloc[:, 2:].to_numpy().flatten()
+            if 0 in total_generation_vals:
+                renew_proportions = []
+                for i, each in enumerate(total_generation_vals):
+                    if each != 0:
+                        renew_proportions.append(renewable_vals[i]/ total_generation_vals[i])
+                    else:
+                        renew_proportions.append(each)
+            else:
+                renew_proportions = renewable_vals / total_generation_vals
             renew_proportions = np.array([round(each, 3) for each in renew_proportions])
             self.analyze_list.append(renew_proportions)
             self.countries_analyzed.append(country)
-        return #(self.analyze_list, self.countries_analyzed)
+        return
 
     def plot_data(self):
-        fig, ax = plt.subplots(1,1, figsize = (12, 6))
+        fig, ax = plt.subplots(1,1, figsize = (14, 8))
         for i, y_data_set in enumerate(self.analyze_list):
             ax.plot(self.year, y_data_set, label = self.countries_analyzed[i])
         ax.set_ylabel('Proportion')
         ax.set_title('Renewable Electricity Produced from {}'.format(self.title))
         ax.legend()
         fig.show()
+
+    def hypo_test(self, aggregated = True, increase_thres = 0.15, alpha = 0.05, subset1 = range(1980, 1983), subset2 = range(2014, 2017)):
+        #Use average of 1980 to 1983 and 2014 to 2017 to account for variability
+        n = len(self.countries_analyzed)
+        subset1_avgs = []
+        subset2_avgs = []
+
+        for prop in self.analyze_list:
+            country_subset1 = np.mean([prop[list(Development_Analysis.year).index(yr1)] for yr1 in subset1])
+            subset1_avgs.append(country_subset1)
+            country_subset2 = np.mean([prop[list(Development_Analysis.year).index(yr2)] for yr2 in subset2])
+            subset2_avgs.append(country_subset2)
+        if aggregated == True:
+            subset1_mean, subset1_stdev = np.mean(subset1_avgs), np.std(subset1_avgs)
+            subset2_mean= np.mean(subset2_avgs)
+            p = 1 - stats.norm(subset1_mean, subset1_stdev).cdf(subset2_mean)
+            print('P-value: ', p)
+            if p <= alpha:
+                print("Reject null hypothesis. Evidence suggests that {} are generating a greater proportion of electricity in {} than in {}".format(self.title, end_year, start_year))
+            else:
+                print("Fail to reject null hypothesis. Insufficient evidence to suggest that {} are generating a greater proportion of electricity in {} than in {}.". format(self.title, end_year, start_year))
+        else:
+            counter = 0
+            total = 0
+            for i in range(n):
+                if (subset2_avgs[i] >= 0.9) & (subset1_avgs[i] >= 0.9):
+                    continue
+                if subset2_avgs[i] >= subset1_avgs[i] + increase_thres:
+                    counter += 1
+                    total += 1
+                elif subset2_avgs[i] <= subset1_avgs[i]:
+                    total += 1
+            p = 1 - stats.binom(total, p=0.5).cdf(counter)
+            print('P-value: ', p)
+            if p <= alpha:
+                print("Reject null hypothesis. Evidence suggests that more than 50% of countries have increased renewable electricity proportion by at least {} % in the time period.".format(100 *increase_thres))
+            else:
+                print("Fail to reject null hypothesis. Insufficient evidence to suggest that more than 50% of countries have increased renewable electricity generation by at least {} % in the time period".format(100*increase_thres))
 
 #The original energy data is formatted with leading spaces to identify subgroups of each type. This function iterates through and replaces these using numerical indexing for readbility in DataFrames.
 
@@ -107,11 +159,6 @@ def indent_replace(a_series):
             print('error, ommitted {}'.format(string))
     return new_series
 
-#Year parameters - must be between 1980 and 2017 (inclusive)
-start_year = 1980
-end_year = 2017
-years_analyzed = range(start_year, end_year + 1)
-
 def combine_countries(df, combine_list, into_country):
     into_data = df[df['Country'] == into_country].loc[:, years_analyzed]
     into_rows = into_data.index
@@ -122,21 +169,6 @@ def combine_countries(df, combine_list, into_country):
         df.loc[row_indexes, years_analyzed] = 0
     df.loc[into_rows, years_analyzed] = into_country_data
     return df
-
-    #847 879
-
-# def col_to_num(df, col1, col2 = None):
-#     for col in df.iloc[:, col1:col2]:
-#         pd.to_numeric(df[col])
-#     return df
-
-# import functools
-# def left_justify(df, col):
-#     formatters= {}
-#     max_val = df[col].str.len().max()
-#     form = '{{:<{}s}}'.format(max_val)
-#     formatters[col] = functools.partial(str.format, form)
-#     return df.to_string(formatters = formatters, index = False)
 
 def make_plots(data, subpltrows = 1, subpltcols = 1):
     fig, axes = plt.subplots(subpltrows, subpltcols, figsize=(14, 6))
@@ -153,12 +185,6 @@ def years_to_int(first_year=start_year, last_year=end_year):
     return years_to_int
 
 plt.style.use('ggplot')
-
-
-
-
-#This number sets the number of countries to analyze per top in each category.
-countries_to_analyze = 20
 
 '''
 -----------------------------------------------------------------
@@ -213,6 +239,7 @@ energy_data.merge(countries)
 energy_data = energy_data.iloc[:, :1].merge(countries).join(energy_data.iloc[:, 1:])
 energy_data.drop('Country Code', axis=1, inplace = True)
 combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
+combine_countries(energy_data, ['Former Czechoslovakia'], 'Czech Republic')
 '''
 -----------------------------------------------------------------
 Import UN HDI data
@@ -227,6 +254,10 @@ HDI_data.drop([HDI_data.columns[x] for x in range(
 HDI_data.iloc[:, 0] = HDI_data.iloc[:, 0].astype('int')
 HDI_data['Country'].replace(
     'Hong Kong, China (SAR)', "Hong Kong", inplace=True)
+HDI_data['Country'].replace(
+    'Korea (Republic of)', "South Korea", inplace=True)
+HDI_data['Country'].replace(
+    'Czechia', "Czech Republic", inplace=True)
 developed_data = HDI_data.sort_values('HDI Rank')['Country'][:countries_to_analyze].reset_index(drop = True)
 developed_countries = list(developed_data)
 '''
@@ -270,27 +301,27 @@ Highest population dataset determined here
 high_pop = pop_data.sort_values(start_year,ascending = False).copy()[1: countries_to_analyze]
 
 #Percentage of renewable electricity of whole world aggregated
-percentage = energy_data.iloc[4][2:].astype(
-    np.float) / energy_data.iloc[0][2:].astype(np.float)
-plt.scatter(percentage.index, percentage)
+#percentage = energy_data.iloc[4][2:].astype(
+#    np.float) / energy_data.iloc[0][2:].astype(np.float)
+#plt.scatter(percentage.index, percentage)
 
 #Worldwide use of renewable energy
-show_plot = 'F'
-if show_plot == 'T':
-    world_fig, world_axes = make_plots(energy_data.iloc[4].iloc[2:])
-    world_axes.set_xlabel('Year')
-    world_axes.xaxis.set_ticks(np.arange(0,int(end_year)-int(start_year), 2))
-    world_axes.set_xlim(-1, 38)
-    world_axes.set_ylabel('Billion Kwh produced')
-    world_axes.set_title('Worldwide Renewable Electricity Production')
-    world_fig.show()
+#show_plot = 'F'
+# if show_plot == 'T':
+#     world_fig, world_axes = make_plots(energy_data.iloc[4].iloc[2:])
+#     world_axes.set_xlabel('Year')
+#     world_axes.xaxis.set_ticks(np.arange(0,int(end_year)-int(start_year), 2))
+#     world_axes.set_xlim(-1, 38)
+#     world_axes.set_ylabel('Billion Kwh produced')
+#     world_axes.set_title('Worldwide Renewable Electricity Production')
+#     world_fig.show()
 
 #World Population
-make_plots(pop_data.sum().loc[years_to_int(pop_data_min_year).values()])
+#make_plots(pop_data.sum().loc[years_to_int(pop_data_min_year).values()])
 
 # Plot of top 20 most developed countries renewable energies
-developed_data = pd.DataFrame(developed_data).merge(energy_data)
-fig, ax = plt.subplots(1,1, figsize = (12,6))
+#developed_data = pd.DataFrame(developed_data).merge(energy_data)
+#fig, ax = plt.subplots(1,1, figsize = (12,6))
 
 
 #lt.plot(developed_energy.iloc[3, 1:].index[1:], developed_energy.iloc[3, 1:].values[1:])
@@ -298,11 +329,10 @@ if __name__ == '__main__':
 #    print(energy_data)
 #pop_data.sum().loc[years_to_int(pop_data_min_year).values()]
 
-
-    Development_Analysis = analysis(energy_data, title = 'Top Developed Countries')
+    Development_Analysis = analysis(energy_data, title='Top Developed Countries')
     Development_Analysis.add_countries(developed_countries)
-    Development_Analysis.plot_data()   
-
-
-    #Population_Analysis = analysis(energy_data, title='Top Populated Countries')
-    #Population_Analysis.add_countries(list(high_pop['Country'])) Need to fix divide by 0
+    Development_Analysis.hypo_test()
+    do_plot = 'T'
+    if do_plot == 'T':
+        Development_Analysis.plot_data()   
+    Development_Analysis.hypo_test(aggregated = False)
