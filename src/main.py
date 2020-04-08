@@ -1,4 +1,4 @@
-#Functions : Plot graphs
+#Functions : Combine East and West Germany into Germany and add to developed plots
 
 '''
 To get year columns mapped as int:
@@ -27,25 +27,56 @@ hypo test
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+plt.close('all')
 
 class analysis(object):
     def __init__(self, data, title):
-        self.data_x = data.columns[2:]
+        self.data = data
+        self.year = data.columns[2:]
         self.title = title
-        self.analyze_list = [self.data_y]
-    
-    def add_data(self, other):
-        self.analyze_list.extend(other)
+        self.analyze_list = []
+        self.countries_analyzed = []
 
-    def show_countries(self):
-        return self.data.loc[:,'Country']
+    def show_countries(self, for_analysis = 'T'):
+        return self.countries_analyzed if for_analysis == 'T' else set(self.data.loc[:,'Country'])
 
-    def plot_data():
+    #Check that the aggregated columns equal the sum of the subsets
+    def sanity_check(self, country = 'Norway', start_year= 1980, end_year = 2017):
+        print('Checking Renewable subrows = renewable total row')
+        for each in range(start_year, end_year + 1):
+            if round(energy_data[energy_data['Country'] == country].loc[:,each].iloc[4:10].sum(),3) != round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[3], 3) :
+                print(each)
+                break
+        print('Checked Renewable subrows = renewable total row')
+        print('Checking all subrows =  total row')
+        for each in range(start_year, end_year + 1):
+            if round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[[1, 2, 3, 10]].sum(), 3) != round(energy_data[energy_data['Country'] == country].loc[:, each].iloc[0], 3):
+                print(each)
+                break
+        print('Checked all subrows=total row')
+
+    #For now only calculates proportion of renewable electricity sources over total - could be modified to include more
+    def add_countries(self, country_list):
+        for country in country_list:
+            if country not in set(self.data['Country']):
+                print(country, 'Not valid country, skipped')
+                continue
+            renewable_vals = self.data[(self.data['Country'] == country) & (self.data['Energy Type'] == '3.Renewables (billion Kwh)')]
+            total_generation_vals = self.data[(self.data['Country'] == country) & (
+                self.data['Energy Type'] == 'Generation (billion Kwh)')]
+            renew_proportions = renewable_vals.iloc[:, 2:].to_numpy().flatten() / total_generation_vals.iloc[:, 2:].to_numpy().flatten()
+            renew_proportions = np.array([round(each, 3) for each in renew_proportions])
+            self.analyze_list.append(renew_proportions)
+            self.countries_analyzed.append(country)
+        return #(self.analyze_list, self.countries_analyzed)
+
+    def plot_data(self):
         fig, ax = plt.subplots(1,1, figsize = (12, 6))
-        for y_data_set in self.analyze_list:
-            ax.plot(self.data_x, y_data_set)
-        axes.set_ylabel('Billion Kwh produced')
-        axes.set_title('Renewable Electricity Production')
+        for i, y_data_set in enumerate(self.analyze_list):
+            ax.plot(self.year, y_data_set, label = self.countries_analyzed[i])
+        ax.set_ylabel('Proportion')
+        ax.set_title('Renewable Electricity Produced from {}'.format(self.title))
+        ax.legend()
         fig.show()
 
 #The original energy data is formatted with leading spaces to identify subgroups of each type. This function iterates through and replaces these using numerical indexing for readbility in DataFrames.
@@ -168,7 +199,8 @@ HDI_data['Country'] = HDI_data['Country'].str.lstrip()
 HDI_data.drop([HDI_data.columns[x] for x in range(
     3, len(HDI_data.columns), 2)], axis=1, inplace=True)
 HDI_data.iloc[:, 0] = HDI_data.iloc[:, 0].astype('int')
-developed = HDI_data.sort_values('HDI Rank')['Country'][:countries_to_analyze].reset_index(drop = True)
+developed_data = HDI_data.sort_values('HDI Rank')['Country'][:countries_to_analyze].reset_index(drop = True)
+developed_countries = list(developed_data)
 '''
 -----------------------------------------------------------------
 Import population data and clean it
@@ -199,6 +231,7 @@ pop_data.loc[0] = pop_data.loc[215]
 pop_data.drop(215, inplace = True)
 pop_data.sort_index(inplace=True)
 pop_data.reset_index(drop=True, inplace=True)
+pop_data.rename(columns = {'Country Name' : 'Country'}, inplace = True)
 
 #pop_data[pop_data['Country Name'] == 'United States']
 '''
@@ -228,13 +261,34 @@ if show_plot == 'T':
 make_plots(pop_data.sum().loc[years_to_int(pop_data_min_year).values()])
 
 # Plot of top 20 most developed countries renewable energies
-developed = pd.DataFrame(developed).merge(energy_data)
+developed_data = pd.DataFrame(developed_data).merge(energy_data)
 fig, ax = plt.subplots(1,1, figsize = (12,6))
 
 # Norway_reuse = developed_energy.
 # ax.plot(developed_energy.columns, )
 
 #lt.plot(developed_energy.iloc[3, 1:].index[1:], developed_energy.iloc[3, 1:].values[1:])
-#if __name__ == '__main__':
+if __name__ == '__main__':
 #    print(energy_data)
-pop_data.sum().loc[years_to_int(pop_data_min_year).values()]
+#pop_data.sum().loc[years_to_int(pop_data_min_year).values()]
+    Development_Analysis = analysis(energy_data, title = 'Developed Countries')
+    Development_Analysis.add_countries(['Norway',
+                                       'Switzerland',
+                                       'Ireland',
+                                       'Hong Kong',
+                                       'Australia',
+                                       'Iceland',
+                                       'Sweden',
+                                       'Singapore',
+                                       'Netherlands',
+                                       'Denmark',
+                                       'Finland',
+                                       'Canada',
+                                       'New Zealand',
+                                       'United Kingdom',
+                                       'United States',
+                                       'Belgium',
+                                       'Liechtenstein',
+                                       'Japan',
+                                       'Austria'])
+    Development_Analysis.plot_data()   # 'Germany'

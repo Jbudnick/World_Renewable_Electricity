@@ -9,9 +9,8 @@ World Energy Use:
 World Population:
 https://data.worldbank.org/indicator/sp.pop.totl
 
-https://worldpopulationreview.com/countries/developed-countries/
-
-https://www.un.org/en/development/desa/policy/wesp/wesp_current/2014wesp_country_classification.pdf
+HDI
+http://hdr.undp.org/en/indicators/137506
 
 To Tell Frank:
 
