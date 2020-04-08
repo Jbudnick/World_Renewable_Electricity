@@ -1,4 +1,3 @@
-#Objects: Countries
 #Functions : Plot graphs
 
 '''
@@ -13,6 +12,7 @@ Left Justify Energy Type column
 Tuesday:
 Finish Hypo Test
 plots
+Convert datasets into objects?
 
 Wednesday
 MVP+ Stuff
@@ -28,17 +28,25 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-""" 
 class analysis(object):
-    def __init__(self, title, data_x, data_ylist):
+    def __init__(self, data, title):
+        self.data_x = data.columns[2:]
         self.title = title
-        self.data_x = data_x
-        self.data_ylist = data_ylist
-
-    def plot_data() 
+        self.analyze_list = [self.data_y]
     
-"""
+    def add_data(self, other):
+        self.analyze_list.extend(other)
 
+    def show_countries(self):
+        return self.data.loc[:,'Country']
+
+    def plot_data():
+        fig, ax = plt.subplots(1,1, figsize = (12, 6))
+        for y_data_set in self.analyze_list:
+            ax.plot(self.data_x, y_data_set)
+        axes.set_ylabel('Billion Kwh produced')
+        axes.set_title('Renewable Electricity Production')
+        fig.show()
 
 #The original energy data is formatted with leading spaces to identify subgroups of each type. This function iterates through and replaces these using numerical indexing for readbility in DataFrames.
 
@@ -85,9 +93,9 @@ def make_plots(data, subpltrows = 1, subpltcols = 1):
 
 plt.style.use('ggplot')
 
-#Set parameters
-start_year = 1980
-end_year = 2017
+#Year parameters - must be between 1980 and 2017 (inclusive)
+start_year = 1980  
+end_year = 2017    
 
 def years_to_int(first_year = start_year, last_year = end_year):
     years_to_int = {str(year): year for year in range(first_year, last_year + 1)}
