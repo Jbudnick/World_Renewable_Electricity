@@ -29,6 +29,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.close('all')
 
+# Create dataset class, convert datasets to objects, cleaning processes to methods
+# 
+# class dataset():
+#     def __init__(self,data):
+#         self.data
+
+
 class analysis(object):
     def __init__(self, data, title):
         self.data = data
@@ -59,7 +66,7 @@ class analysis(object):
     def add_countries(self, country_list):
         for country in country_list:
             if country not in set(self.data['Country']):
-                print(country, 'Not valid country, skipped')
+                print(country, 'is not in energy data and has been skipped.')
                 continue
             renewable_vals = self.data[(self.data['Country'] == country) & (self.data['Energy Type'] == '3.Renewables (billion Kwh)')]
             total_generation_vals = self.data[(self.data['Country'] == country) & (
@@ -100,6 +107,18 @@ def indent_replace(a_series):
             print('error, ommitted {}'.format(string))
     return new_series
 
+#Year parameters - must be between 1980 and 2017 (inclusive)
+start_year = 1980
+end_year = 2017
+years_analyzed = range(start_year, end_year + 1)
+
+def combine_countries(df, combine_list, into_country):
+    into_country_data = df[df['Country'] == into_country].loc[:, years_analyzed].to_numpy()
+    for country in combine_list:
+        into_country_data += df[df['Country'] == country].loc[:, years_analyzed].to_numpy()
+        df[df['Country'] == country].loc[:, years_analyzed] = 0
+    return df
+
 # def col_to_num(df, col1, col2 = None):
 #     for col in df.iloc[:, col1:col2]:
 #         pd.to_numeric(df[col])
@@ -122,15 +141,15 @@ def make_plots(data, subpltrows = 1, subpltcols = 1):
     axes.grid(True)
     return fig, axes
 
+def years_to_int(first_year=start_year, last_year=end_year):
+    years_to_int = {str(year): year for year in range(
+        first_year, last_year + 1)}
+    return years_to_int
+
 plt.style.use('ggplot')
 
-#Year parameters - must be between 1980 and 2017 (inclusive)
-start_year = 1980  
-end_year = 2017    
 
-def years_to_int(first_year = start_year, last_year = end_year):
-    years_to_int = {str(year): year for year in range(first_year, last_year + 1)}
-    return years_to_int
+
 
 #This number sets the number of countries to analyze per top in each category.
 countries_to_analyze = 20
