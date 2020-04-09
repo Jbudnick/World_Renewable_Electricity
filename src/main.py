@@ -3,15 +3,9 @@
 Null hypo: p0 <= pA
 Alt hypo pA > p0
 
-Bring in list of developed vs developing countries
-color code 
-
 Ask about working on object - how to make subplot with class
 To Do ++ :
 Convert datasets into objects?
-
-Wednesday
-MVP+ Stuff
 
 Thursday:
 Clean Code, Work on readme
@@ -42,7 +36,7 @@ class dataset(object):
         pass
 
 class Analysis(object):
-    def __init__(self, data, title):
+    def __init__(self, data, title = 'untitled'):
         self.data = data
         self.year = data.columns[2:]
         self.title = title
@@ -67,36 +61,11 @@ class Analysis(object):
                 break
         print('Checked all subrows=total row')
 
-    #For now only calculates proportion of renewable electricity sources over total - could be modified to include more
     def add_countries(self, country_list):
-        for country in country_list:
-            if country not in set(self.data['Country']):
-                print(country, 'is not in energy data and has been skipped.')
-                continue
-
-            renewable_vals = self.data[(self.data['Country'] == country) & (self.data['Energy Type'] == '3.Renewables (billion Kwh)')]
-
-            total_gen = self.data[(self.data['Country'] == country) & (
-                self.data['Energy Type'] == 'Generation (billion Kwh)')].iloc[0, 2:].to_numpy()
-
-            hydro_storage = self.data[(self.data['Country'] == country) & (
-                self.data['Energy Type'] == '4.Hydroelectric pumped storage (billion Kwh)')].iloc[0,2:].to_numpy()
-
-            total_generation_vals = total_gen - hydro_storage
-            renewable_vals = renewable_vals.iloc[:, 2:].to_numpy().flatten()
-            if 0 in total_generation_vals:
-                renew_proportions = []
-                for i, each in enumerate(total_generation_vals):
-                    if each != 0:
-                        renew_proportions.append(renewable_vals[i]/ total_generation_vals[i])
-                    else:
-                        renew_proportions.append(each)
-            else:
-                renew_proportions = renewable_vals / total_generation_vals
-            renew_proportions = np.array([round(each, 3) for each in renew_proportions])
-            self.analyze_list.append(renew_proportions)
-            self.countries_analyzed.append(country)
-        return
+        propDF = calculate_proportions(country_list)
+        self.analyze_list = propDF.to_numpy()
+        self.countries_analyzed = list(propDF.index)
+        return propDF
 
     # def make_subplots(data_list):
     # row_plots = (len(data_list) + 1)//2
@@ -104,12 +73,12 @@ class Analysis(object):
     # for ax, obj in zip(axes.flatten(), data_list):
     #     ax = plt.plot()
 
-    
-    def plot_data(self, include_world = False, maxlines = 15):
-        self.fig, ax = plt.subplots(1,1, figsize = (14, 8))
+    def plot_data(self, maxlines= 15, include_world = False):
+        self.fig, ax = plt.subplots(1, 1, figsize=(14, 8))
         for i, y_data_set in enumerate(self.analyze_list[0: maxlines]):
             ax.plot(self.year, y_data_set, label = self.countries_analyzed[i])
-        ax.plot()
+        if include_world == True:
+            ax.plot(self.year, calculate_proportions(["World"]).to_numpy().flatten(), label='World')
         ax.set_ylabel('Proportion of Total Electrcity Generated')
         ax.set_title('Renewable Electricity Produced from {}'.format(self.title))
         ax.legend(loc ='center left', bbox_to_anchor = (1, 0.5))
@@ -185,6 +154,49 @@ def combine_countries(df, combine_list, into_country):
     df.loc[into_rows, years_analyzed] = into_country_data
     return df
 
+    #For now only calculates proportion of renewable electricity sources over total - could be modified to include more
+
+def calculate_proportions(country_list):
+    calc_list, countries_calc = [], []
+    for country in country_list:
+        if country not in set(energy_data['Country']):
+            print(country, 'is not in energy data and has been skipped.')
+            continue
+
+        renewable_vals = energy_data[(energy_data['Country'] == country) & (energy_data['Energy Type'] == '3.Renewables (billion Kwh)')]
+
+        total_gen = energy_data[(energy_data['Country'] == country) & (
+            energy_data['Energy Type'] == 'Generation (billion Kwh)')].iloc[0, 2:].to_numpy()
+
+        hydro_storage = energy_data[(energy_data['Country'] == country) & (
+            energy_data['Energy Type'] == '4.Hydroelectric pumped storage (billion Kwh)')].iloc[0,2:].to_numpy()
+
+        total_generation_vals = total_gen - hydro_storage
+        renewable_vals = renewable_vals.iloc[:, 2:].to_numpy().flatten()
+        if 0 in total_generation_vals:
+            renew_proportions = []
+            for i, each in enumerate(total_generation_vals):
+                if each != 0:
+                    renew_proportions.append(renewable_vals[i]/ total_generation_vals[i])
+                else:
+                    renew_proportions.append(each)
+        else:
+            renew_proportions = renewable_vals / total_generation_vals
+        renew_proportions = np.array([round(each, 3) for each in renew_proportions])
+        calc_list.append(renew_proportions)
+        countries_calc.append(country)
+        RenewDF = pd.DataFrame(calc_list, columns = years_analyzed, index = countries_calc)
+    return RenewDF
+
+def get_improved_countries(countries, improvement_perc=.274, years=years_analyzed, include_early_0s=False):
+    propDF = calculate_proportions(countries)
+    propDF['Improvement'] = propDF[years[-1]] - propDF[years[0]]
+    propDF = propDF[propDF['Improvement'] >= improvement_perc]
+    if include_early_0s == False:
+        propDF = propDF[propDF[years[0]] != 0]
+    propDF.sort_values('Improvement', ascending = False, inplace = True)
+    return propDF
+
 # def make_plots(data, subpltrows = 1, subpltcols = 1):
 #     fig, axes = plt.subplots(subpltrows, subpltcols, figsize=(14, 6))
 #     x = data.index
@@ -256,6 +268,10 @@ energy_data = energy_data.iloc[:, :1].merge(countries).join(energy_data.iloc[:, 
 energy_data.drop('Country Code', axis=1, inplace = True)
 combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
 combine_countries(energy_data, ['Former Czechoslovakia'], 'Czech Republic')
+
+allcountries = set(energy_data['Country'][1:])
+allcountries.remove("World")
+
 '''
 -----------------------------------------------------------------
 Import UN HDI data and clean
@@ -276,6 +292,14 @@ HDI_data['Country'].replace(
     'Czechia', "Czech Republic", inplace=True)
 HDI_data['Country'].replace(
     'Russian Federation', "Russia", inplace=True)
+HDI_data['Country'].replace(
+    'Congo (Democratic Republic of the)', "Congo-Kinshasa", inplace=True)
+HDI_data['Country'].replace(
+    'Gambia', "Gambia, The", inplace=True)
+HDI_data['Country'].replace(
+    "Côte d'Ivoire", "Cote dIvoire", inplace=True)
+HDI_data['Country'].replace(
+    'Tanzania (United Republic of)', "Tanzania", inplace=True)
 developed_data = HDI_data.sort_values('HDI Rank')['Country'].reset_index(drop = True)
 developed_countries = list(developed_data)
 '''
@@ -353,6 +377,8 @@ if __name__ == '__main__':
     Worldwide_Analysis.add_countries(['World'])
     Worldwide_Analysis.plot_data()
 
+    print('------------------------------------------')
+
     Development_Analysis = Analysis(energy_data, title='Top Developed Countries')
     developed_countries.insert(0,'World')
     Development_Analysis.add_countries(developed_countries[:countries_to_analyze])
@@ -360,22 +386,44 @@ if __name__ == '__main__':
     Development_Analysis.plot_data()
     # Development_Analysis.hypo_test(aggregated = False)
 
+    print('------------------------------------------')
+
     Least_Dev_Analysis = Analysis(energy_data, title = 'Least Developed Countries')
     Least_Dev_Analysis.add_countries(
         developed_countries[-1: -1 * countries_to_analyze: -1])
     Least_Dev_Analysis.plot_data()
+    Least_Dev_Analysis.hypo_test()
+
+    print('------------------------------------------')
 
     HighPop_Analysis = Analysis(energy_data, 'Countries with Largest Population')
     HighPop_Analysis.add_countries(list(high_pop['Country']))
     HighPop_Analysis.plot_data()
+    HighPop_Analysis.hypo_test()
+
+    print('------------------------------------------')
 
     North_America_Analysis = Analysis(energy_data, 'North American Countries')
     North_America_Analysis.add_countries(
         cont_data[cont_data['Continent'] == 'North America'].loc[:, 'Country'])
     North_America_Analysis.plot_data()
+    North_America_Analysis.hypo_test()
+
+    print('------------------------------------------')
 
     Europe_Analysis = Analysis(energy_data, 'European Countries')
     Europe_Analysis.add_countries(
         cont_data[cont_data['Continent'] == 'Europe'].loc[:, 'Country'])
     Europe_Analysis.plot_data()
     Europe_Analysis.hypo_test()
+
+    print('------------------------------------------')
+
+    Improved_Analysis = Analysis(energy_data, 'Largest Increase')
+    Improved_Analysis.add_countries(get_improved_countries(allcountries, improvement_perc=.274).index)
+    Improved_Analysis.hypo_test()
+
+    print('------------------------------------------')
+    Highest_Prop_2017_Analysis = Analysis(energy_data, title = 'Top renewable electricity proportion countries')  
+    Highest_prop_data = Highest_Prop_2017_Analysis.add_countries(allcountries)
+    Highest_prop_data.sort_values(2017, ascending=False, inplace = True)
