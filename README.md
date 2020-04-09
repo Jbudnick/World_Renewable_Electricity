@@ -11,7 +11,3 @@ https://data.worldbank.org/indicator/sp.pop.totl
 
 HDI
 http://hdr.undp.org/en/indicators/137506
-
-To Tell Frank:
-
-Changing project slightly - rather than choose a population threshold for developed countries (India is less developed but very high population - getting a dataset from UN that classifies developed vs developing and using those developed countries for hypothesis - will still look at population data though)

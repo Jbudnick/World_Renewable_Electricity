@@ -6,6 +6,7 @@ Alt hypo pA > p0
 Bring in list of developed vs developing countries
 color code 
 
+Ask about working on object - how to make subplot with class
 To Do ++ :
 Convert datasets into objects?
 
@@ -14,6 +15,10 @@ MVP+ Stuff
 
 Thursday:
 Clean Code, Work on readme
+
+Need Help:
+With class - how can I have objects interact with one another? Trying to create subplots
+
 '''
 import numpy as np
 import pandas as pd
@@ -28,13 +33,15 @@ years_analyzed = range(start_year, end_year + 1)
 
 countries_to_analyze = 35
 
-# Create dataset class, convert datasets to objects, cleaning processes to methods
-# 
-# class dataset():
-#     def __init__(self,data):
-#         self.data
+class dataset(object):
+    def __init__(self,data):
+        self.data
+    def clean_data():
+        pass
+    def load_data():
+        pass
 
-class analysis(object):
+class Analysis(object):
     def __init__(self, data, title):
         self.data = data
         self.year = data.columns[2:]
@@ -91,14 +98,22 @@ class analysis(object):
             self.countries_analyzed.append(country)
         return
 
-    def plot_data(self):
-        fig, ax = plt.subplots(1,1, figsize = (14, 8))
-        for i, y_data_set in enumerate(self.analyze_list):
+    # def make_subplots(data_list):
+    # row_plots = (len(data_list) + 1)//2
+    # fig, axes = plt.subplots(row_plots, 2)
+    # for ax, obj in zip(axes.flatten(), data_list):
+    #     ax = plt.plot()
+
+    
+    def plot_data(self, include_world = False, maxlines = 15):
+        self.fig, ax = plt.subplots(1,1, figsize = (14, 8))
+        for i, y_data_set in enumerate(self.analyze_list[0: maxlines]):
             ax.plot(self.year, y_data_set, label = self.countries_analyzed[i])
-        ax.set_ylabel('Proportion')
+        ax.plot()
+        ax.set_ylabel('Proportion of Total Electrcity Generated')
         ax.set_title('Renewable Electricity Produced from {}'.format(self.title))
-        ax.legend()
-        fig.show()
+        ax.legend(loc ='center left', bbox_to_anchor = (1, 0.5))
+        return self.fig
 
     def hypo_test(self, aggregated = True, increase_thres = 0.15, alpha = 0.05, subset1 = range(1980, 1983), subset2 = range(2014, 2017)):
         #Use average of 1980 to 1983 and 2014 to 2017 to account for variability
@@ -107,9 +122,9 @@ class analysis(object):
         subset2_avgs = []
 
         for prop in self.analyze_list:
-            country_subset1 = np.mean([prop[list(Development_Analysis.year).index(yr1)] for yr1 in subset1])
+            country_subset1 = np.mean([prop[list(self.year).index(yr1)] for yr1 in subset1])
             subset1_avgs.append(country_subset1)
-            country_subset2 = np.mean([prop[list(Development_Analysis.year).index(yr2)] for yr2 in subset2])
+            country_subset2 = np.mean([prop[list(self.year).index(yr2)] for yr2 in subset2])
             subset2_avgs.append(country_subset2)
         if aggregated == True:
             subset1_mean, subset1_stdev = np.mean(subset1_avgs), np.std(subset1_avgs)
@@ -170,14 +185,15 @@ def combine_countries(df, combine_list, into_country):
     df.loc[into_rows, years_analyzed] = into_country_data
     return df
 
-def make_plots(data, subpltrows = 1, subpltcols = 1):
-    fig, axes = plt.subplots(subpltrows, subpltcols, figsize=(14, 6))
-    x = data.index
-    y = [float(data[val]) for val in x]
-    axes.scatter(x, y)
-    fig.tight_layout(pad = 3)
-    axes.grid(True)
-    return fig, axes
+# def make_plots(data, subpltrows = 1, subpltcols = 1):
+#     fig, axes = plt.subplots(subpltrows, subpltcols, figsize=(14, 6))
+#     x = data.index
+#     y = [float(data[val]) for val in x]
+#     axes.scatter(x, y)
+#     fig.tight_layout(pad = 3)
+#     axes.grid(True)
+#     return fig, axes
+
 
 def years_to_int(first_year=start_year, last_year=end_year):
     years_to_int = {str(year): year for year in range(
@@ -242,7 +258,7 @@ combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
 combine_countries(energy_data, ['Former Czechoslovakia'], 'Czech Republic')
 '''
 -----------------------------------------------------------------
-Import UN HDI data
+Import UN HDI data and clean
 -----------------------------------------------------------------
 '''
 HDI_data = pd.read_csv('data/HDI.csv', nrows=190)
@@ -258,7 +274,9 @@ HDI_data['Country'].replace(
     'Korea (Republic of)', "South Korea", inplace=True)
 HDI_data['Country'].replace(
     'Czechia', "Czech Republic", inplace=True)
-developed_data = HDI_data.sort_values('HDI Rank')['Country'][:countries_to_analyze].reset_index(drop = True)
+HDI_data['Country'].replace(
+    'Russian Federation', "Russia", inplace=True)
+developed_data = HDI_data.sort_values('HDI Rank')['Country'].reset_index(drop = True)
 developed_countries = list(developed_data)
 '''
 -----------------------------------------------------------------
@@ -291,7 +309,16 @@ pop_data.drop(215, inplace = True)
 pop_data.sort_index(inplace=True)
 pop_data.reset_index(drop=True, inplace=True)
 pop_data.rename(columns = {'Country Name' : 'Country'}, inplace = True)
-
+pop_data['Country'].replace(
+    'Russian Federation', "Russia", inplace=True)
+pop_data['Country'].replace(
+    'Egypt, Arab Rep.', "Egypt", inplace=True)
+pop_data['Country'].replace(
+    'Iran, Islamic Rep.', "Iran", inplace=True)
+pop_data['Country'].replace(
+    'Korea, Rep.', "South Korea", inplace=True)
+pop_data['Country'].replace(
+    'Congo, Dem. Rep.', "Congo-Kinshasa", inplace=True)
 #pop_data[pop_data['Country Name'] == 'United States']
 '''
 --------------------------------------------
@@ -300,39 +327,55 @@ Highest population dataset determined here
 '''
 high_pop = pop_data.sort_values(start_year,ascending = False).copy()[1: countries_to_analyze]
 
-#Percentage of renewable electricity of whole world aggregated
-#percentage = energy_data.iloc[4][2:].astype(
-#    np.float) / energy_data.iloc[0][2:].astype(np.float)
-#plt.scatter(percentage.index, percentage)
+'''
+-------------------------------------------
+Continent Data
+-------------------------------------------
+'''
+cont_data = pd.read_csv('data/CountryContent.csv', header = 4)
+cont_data.drop(['4203.93645368'],
+               axis=1, inplace=True)
+cont_data.rename(columns={
+                 'INTL.2-12-USA-BKWH.A': 'Continent', '        United States': 'Country'}, inplace=True)
+cont_data['Continent'].iloc[0:58] = 'Africa'
+cont_data['Continent'].iloc[0:106] = 'Asia & Oceania'
+cont_data['Continent'].iloc[106:152] = 'Central & South America'
+cont_data['Continent'].iloc[152:160] = 'North America'
+cont_data['Continent'].iloc[160:175] = 'Middle East'
+cont_data['Continent'].iloc[175:221] = 'Europe'
+cont_data['Continent'].iloc[221:] = 'Eurasia'
+cont_data['Country'] = cont_data['Country'].str.lstrip()
+cont_data.drop([58, 106, 152, 160, 175, 221], inplace = True)
+cont_data.reset_index(drop = True)
 
-#Worldwide use of renewable energy
-#show_plot = 'F'
-# if show_plot == 'T':
-#     world_fig, world_axes = make_plots(energy_data.iloc[4].iloc[2:])
-#     world_axes.set_xlabel('Year')
-#     world_axes.xaxis.set_ticks(np.arange(0,int(end_year)-int(start_year), 2))
-#     world_axes.set_xlim(-1, 38)
-#     world_axes.set_ylabel('Billion Kwh produced')
-#     world_axes.set_title('Worldwide Renewable Electricity Production')
-#     world_fig.show()
-
-#World Population
-#make_plots(pop_data.sum().loc[years_to_int(pop_data_min_year).values()])
-
-# Plot of top 20 most developed countries renewable energies
-#developed_data = pd.DataFrame(developed_data).merge(energy_data)
-#fig, ax = plt.subplots(1,1, figsize = (12,6))
-
-
-#lt.plot(developed_energy.iloc[3, 1:].index[1:], developed_energy.iloc[3, 1:].values[1:])
 if __name__ == '__main__':
-#    print(energy_data)
-#pop_data.sum().loc[years_to_int(pop_data_min_year).values()]
+    Worldwide_Analysis = Analysis(energy_data, title='Worldwide')
+    Worldwide_Analysis.add_countries(['World'])
+    Worldwide_Analysis.plot_data()
 
-    Development_Analysis = analysis(energy_data, title='Top Developed Countries')
-    Development_Analysis.add_countries(developed_countries)
+    Development_Analysis = Analysis(energy_data, title='Top Developed Countries')
+    developed_countries.insert(0,'World')
+    Development_Analysis.add_countries(developed_countries[:countries_to_analyze])
     Development_Analysis.hypo_test()
-    do_plot = 'T'
-    if do_plot == 'T':
-        Development_Analysis.plot_data()   
-    Development_Analysis.hypo_test(aggregated = False)
+    Development_Analysis.plot_data()
+    # Development_Analysis.hypo_test(aggregated = False)
+
+    Least_Dev_Analysis = Analysis(energy_data, title = 'Least Developed Countries')
+    Least_Dev_Analysis.add_countries(
+        developed_countries[-1: -1 * countries_to_analyze: -1])
+    Least_Dev_Analysis.plot_data()
+
+    HighPop_Analysis = Analysis(energy_data, 'Countries with Largest Population')
+    HighPop_Analysis.add_countries(list(high_pop['Country']))
+    HighPop_Analysis.plot_data()
+
+    North_America_Analysis = Analysis(energy_data, 'North American Countries')
+    North_America_Analysis.add_countries(
+        cont_data[cont_data['Continent'] == 'North America'].loc[:, 'Country'])
+    North_America_Analysis.plot_data()
+
+    Europe_Analysis = Analysis(energy_data, 'European Countries')
+    Europe_Analysis.add_countries(
+        cont_data[cont_data['Continent'] == 'Europe'].loc[:, 'Country'])
+    Europe_Analysis.plot_data()
+    Europe_Analysis.hypo_test()
