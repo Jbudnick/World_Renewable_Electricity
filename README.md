@@ -1,13 +1,14 @@
 #  Transition to Renewable Electricity Resources Around the World: Are Countries Around the World Moving Towards Resources for Renewable Electricity?
 
-This day in age, we are more dependent on electricity than ever before, and that doesn't seem to be changing any time soon. It is well known that the world population is growing, and with that rate energy demands are increasing. However, with the depletion of nonrenewable resources and climate change, how much of a priority is the transition to renewable resources for electricity for countries around the world? I was curious to see if there are any specific trends in regions around the world, and if the more developed countries are making this issue a priority and preparing for the future. I also explored if there are specific trends in certain areas of the world in terms of their proportions of renewable to total electricity generation.
+This day in age, we are more dependent on electricity than ever before, and that doesn't seem to be changing any time soon. It is well known that the world population is growing, and with that energy demands are increasing. However, with the depletion of nonrenewable resources and climate change, how much of a priority is the transition to renewable resources for electricity for countries around the world? I was curious to see if there are any specific trends in regions around the world, and if the more developed countries are making this issue a priority and preparing for the future. I also explored if there are specific trends in certain areas of the world in terms of their proportions of renewable to total electricity generation.
 
 # Data + Cleaning
-I used three datasets for this study, each of which needed to be cleaned. The Energy Information Administration (EIA) has released a dataset of the types and quantity of electricity generation of countries around the world from years 1980 to 2017, which was the main resource I used for this study. An issue I came across was indented strings as row entries in the energy dataset used to represent different data based on the indentation, which  and many missing values. Missing data values were assumed to be zero. Also, many countries since 1980 have changed names, dissolved into other countries, and were slightly different between datasets, making it difficult to link data from one to the other. This was definitely the most time consuming aspect of this project, but my code can now analyze and make plots and histograms for any list of countries that are inputted. 
+
+I used three datasets for this study, each of which needed to be cleaned. The Energy Information Administration (EIA) has released a dataset of the types and quantity of electricity generation of countries around the world from years 1980 to 2017, which was the main resource I used for this study. An issue I came across was indented strings as row entries in the energy dataset used to represent different data based on the indentation, which  and many missing values. Missing data values were assumed to be zero. Also, many countries since 1980 have changed names, dissolved into other countries, and were slightly different between datasets, making it difficult to link data from one to the other. This was definitely the most time consuming aspect of this project, but my code can now analyze and make plots and histograms for mostly any list of countries that are inputted. 
 
 ![Image](images/Energy.png)
 
- I also used the United Nations Human Development Index to take a sample of the most highly developed countries in the world for my analysis. My primary goal of this study was to determine if the countries that have the resources to do so are transitioning to renewable resources for electricity, and I believe that the development index is a good indicator of that. This dataset for some reason contained empty columns in every other column, which were easily dropped. The only struggle with this dataset is the names of some countries are spelled slightly different than the other dataset, making linking them for analysis somewhat difficult. My code outputs a message when a country isn't found, so I can rename them between datasets so that they are consistent. 
+ I also used the United Nations Human Development Index to take a sample of the most highly developed countries in the world for my analysis. My primary goal of this study was to determine if the countries that have the resources to do so are transitioning to renewable resources for electricity, and I believe that the development index is a decent indicator. This dataset, for some reason contained empty columns in every other column, which were easily dropped. The only struggle with this dataset is the names of some countries are spelled slightly different in this dataset than the other dataset, making linking them for analysis tedious. My code outputs a message when a country isn't found, so I can rename them in the dataset to be consistent with the energy dataset. 
 
 ![Image](images/HDI.png)
 
@@ -35,7 +36,7 @@ I also ran a hypothesis test for regions of the world to determine if there was 
 
 ![Image](images/lessDevelop.png)
 
- After my finds from the most developed countries in the world, I was curious to see what I would find when testing a subset of the least developed countries in the world. I found that there is a wide spread
+ After my finds from the most developed countries in the world, I was curious to see what I would find when testing a subset of the least developed countries in the world. I found that there is a wide spread here as well, but there are many countries with a very small proportion. The hypothesis test on this data yielded a value of 0.509, much too high to reject the null hypothesis.
 
 ![Image](images/HighPop.png)
 
@@ -54,7 +55,7 @@ P-value = 0.495
 
 ![Image](images/EU.png)
 
-The top European countries seem to show an upwards trend. The P value is smaller than any of the groups, but is still too high to reject the null hypothesis.
+The European countries seem to show an upwards trend. The P value is smaller than any of the groups, but is still too high to reject the null hypothesis.
 P-value = 0.25
 
 ![Image](images/EUasia.png)
@@ -64,7 +65,7 @@ P - value (from 1992 onward) : 0.485
 
 ![Image](images/MidE.png)
 
-The Middle East shows a strong negative trend, and that less renewable resources are being used for electricity. Since the middle east is home to many of the world's oil reserves, it makes sense they would use that instead of seeking renewable resources instead. The high P-value is consistent with this.
+The Middle East shows a strong negative trend, and that less renewable resources are being used for electricity. Since the middle east is home to many of the world's oil reserves, my assumption is they are using a greater proportion of that as opposed to seeking renewable resources. The high P-value is consistent with this assumption.
 
 P - value = 0.65
 
@@ -94,9 +95,9 @@ I plotted the countries with the top 10 highest proportions in 2017 on this map.
 
 Unfortunately, it looks like there is not sufficient evidence to support the claim that countries around the world are producing a greater proportion of renewable electrity to total electrical generation. Although some regions ended up with a lower P-value and therefore were closer than others to rejecting the null hypothesis, the differences found were not statistically significant enough to reject the null hypothesis.
 
-The countries with the top ten proportions were widespread and it looks like the use of renewable resources may be better attributed to factors such as access to technology and use of electricity - perhaps future analaysis could explore country subsets based on their use of electricity. 
+The countries with the top ten proportions were widespread and it looks like the use of renewable resources may be better attributed to factors such as access to technology and use of electricity - perhaps future analaysis could explore country subsets based on their use of electricity. This would make sense if renewable resources are more feasibly produced and used as the majority in areas of lower demand.
 
-I find this conclusion alarming, as our resources are rapidly diminishing and I was hoping to see more of a change throughout the world. Although the dataset's most recent complete data is from 2017, hopefully an upward trend will occur through the coming years and the world can move towards a more sustainable future.
+I find this conclusion alarming, as the world's resources are rapidly diminishing and I was hoping to see more of a change throughout the world. Although the dataset's most recent complete data is from 2017, hopefully an upward trend will occur through the coming years and the world can move towards a more sustainable future.
 
 # Data Sources: 
 World Energy Use:
