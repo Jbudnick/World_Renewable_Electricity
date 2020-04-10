@@ -1,5 +1,7 @@
 # Are Countries Around the World Transitioning to forms of Renewable Electricity?
-This day in age, we are more dependent on electricity than ever before, and that doesn't seem to be changing any time soon. It is well known that the world is growing at a faster rate, and with that rate energy demands are increasing. However, with the depletion of natural resources and the rise of global warming and threat of enviornmental crises, how much of a priority is the transition to renewable resources for electrcity for countries around the world? I was curious to see if there are any specific trends in regions around the world, and if the more developed countries are making this issue a priority. I also explored if there are specific trends in certain areas of the world in terms of their proportions of renewable to total electricity generation.
+This day in age, we are more dependent on electricity than ever before, and that doesn't seem to be changing any time soon. It is well known that the world population is growing, and with that rate energy demands are increasing. However, with the depletion of nonrenewable resources and the rise of global warming and threat of enviornmental crises, how much of a priority is the transition to renewable resources for electricity for countries around the world? I was curious to see if there are any specific trends in regions around the world, and if the more developed countries are making this issue a priority and preparing for the future. I also explored if there are specific trends in certain areas of the world in terms of their proportions of renewable to total electricity generation.
+
+![Image](images/filtered_counts.png)
 
 # Data
 The EIA has released a dataset of the types and quantity of electricity generation of countries around the world from years 1980 to 2017, which was the main resource I used for this study. I also used the United Nations Human Development Index to take a sample of the most highly developed countries in the world for my analysis. My primary goal of this study was to determine if the countries that have the resources to do so are transitioning to renewable resources for electrcity, and I believe that the development index is a good indicator of that. I also used the World Population dataset from the World bank to analyze if the most populated countries in the world were transitioning their energy.
@@ -11,6 +13,12 @@ Capstone 1 Project: Are the majority of developed countries transitioning to cle
 I am curious to see how common throughout the world it is for countries to be concerned with climate change and the depletion of nonrenewable resources.
 
 Are there specific regions of the world in which the transition has been greater? 
+
+# Conclusion
+
+Unfortunately, it looks like there is not sufficient evidence to support the claim that countries around the world are producing a greater proportion of renewable electrity around the world. Although some regions ended up with a lower P-value and therefore were closer than others to rejecting the null hypothesis, but the differences found were not enough.
+
+I find this find alarming, as 
 
 # Data Sources: 
 World Energy Use:

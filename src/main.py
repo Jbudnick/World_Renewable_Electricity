@@ -1,20 +1,3 @@
-'''
-
-Null hypo: p0 <= pA
-Alt hypo pA > p0
-
-Ask about working on object - how to make subplot with class
-To Do ++ :
-Convert datasets into objects?
-
-Thursday:
-Transfer Continent analysis to jupyter notebook, make subplots and save
-Configure plot axes better
-Finish Readme
-Clean up code
-World map plot
-
-'''
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -27,6 +10,8 @@ end_year = 2017
 years_analyzed = range(start_year, end_year + 1)
 
 countries_to_analyze = 35
+
+#The analysis class will allow a user to, after defining, add a list of countries. These will then be converted into proportions and can be plotted and/or used for a hypothesis test of whether the proportions have increased over the years.
 
 class Analysis(object):
     def __init__(self, data, title = 'untitled', startcol = 1980):
@@ -55,22 +40,29 @@ class Analysis(object):
         print('Checked all subrows=total row')
 
     def add_countries(self, country_list, orderby_latest=True):
-        propDF = calculate_proportions(country_list, orderby_latest=True)
-        self.analyze_list = propDF.to_numpy()
-        self.countries_analyzed = list(propDF.index)
-        return propDF
+        self.propDF = calculate_proportions(country_list, orderby_latest=True)
+        self.analyze_list = self.propDF.to_numpy()
+        self.countries_analyzed = list(self.propDF.index)
+        return self.propDF
 
-    def plot_data(self, maxlines= 10, include_world = False):
-        self.fig, ax = plt.subplots(1, 1, figsize=(14, 8))
+    def plot_data(self, figsize = (14, 8), maxlines= 10, include_world = False, include_legend = True):
+        self.fig, ax = plt.subplots(1, 1, figsize= figsize)
         if include_world == True:
-            ax.plot(self.year, calculate_proportions(["World"]).to_numpy(
-            ).flatten(), color = 'blue', ls=(0, (10, 12)), linewidth=0.8, label='World')
+            ax.plot(self.year, calculate_proportions(["World"]).to_numpy().flatten()[(self.year[0]- 1980):], color = 'blue', ls=(0, (10, 12)), linewidth=0.8, label='World')
         for i, y_data_set in enumerate(self.analyze_list[0: maxlines]):
-            ax.plot(self.year, y_data_set, label = self.countries_analyzed[i])
+            ax.plot(self.year, y_data_set[(self.year[0] - 1980):], label = self.countries_analyzed[i])
         ax.set_ylabel('Proportion of Total Electrcity Generated')
         ax.set_title('Renewable Electricity Produced from {}'.format(self.title))
-        ax.legend(loc ='center left', bbox_to_anchor = (1, 0.5))
-        return
+        ax.legend(loc ='center left', bbox_to_anchor = (1, 0.5)) if include_legend == True else None
+        return self.fig
+
+    def make_hist(self, figsize = (12,8)):
+        self.fig, ax = plt.subplots(1,1, figsize = figsize)
+        ax.hist([self.propDF[self.year[0]], self.propDF[self.year[20]], self.propDF[self.year[-1]]], label = [self.year[0], self.year[20], self.year[-1]])
+        ax.legend()
+        ax.set_xlabel('Proportion of Renewable Electricity Produced')
+        ax.set_title('Histogram of {}'.format(self.title))
+        return self.fig
 
     def hypo_test(self, aggregated = True, increase_thres = 0.15, alpha = 0.05):
         #Use average of 1980 to 1983 and 2014 to 2017 to account for variability
@@ -198,171 +190,172 @@ def years_to_int(first_year=start_year, last_year=end_year):
 
 plt.style.use('ggplot')
 
-'''
------------------------------------------------------------------
-Import electricity generation data and clean it
------------------------------------------------------------------
-'''
-energy_data = pd.read_csv('data/INT-Export-04-05-2020_00-10-38.csv', header=1)
-energy_data.rename(columns={'Unnamed: 1': 'Energy Type', 'API': 'Country Code'}, inplace = True)
-energy_data.rename(columns = years_to_int(), inplace=True)
-# 2018 has a lot of missing data
-energy_data.drop('2018', axis=1, inplace=True)
 
-#Original dataset has several rows that are totals of other forms of energy. This section drops the rows of totals so that only renewable energy has subgroups. Several countries are missing a country code and these are specified manually.
-energy_data['Country Code'].loc[1981:1994] = 'Micronesia'
-energy_data['Country Code'].loc[2297:2309] = 'MNP'
-energy_data['Country Code'].loc[3181:3194] = 'Tuvalu'
-energy_data['Country Code'].loc[3211:3224] = 'U.S. Territories'
-countries = energy_data['Energy Type'][0::15]
-energy_data.drop(energy_data.loc[0::15].index, inplace=True)
-energy_data.drop(energy_data.loc[6::14].index, inplace=True)
-energy_data.drop(energy_data.loc[8::13].index, inplace=True)
-energy_data.drop(energy_data.loc[9::12].index, inplace=True)
-energy_data.reset_index(drop = True, inplace = True)
+if __name__ == '__main__':
+    '''
+    -----------------------------------------------------------------
+    Import electricity generation data and clean it
+    -----------------------------------------------------------------
+    '''
+    energy_data = pd.read_csv('data/INT-Export-04-05-2020_00-10-38.csv', header=1)
+    energy_data.rename(columns={'Unnamed: 1': 'Energy Type', 'API': 'Country Code'}, inplace = True)
+    energy_data.rename(columns = years_to_int(), inplace=True)
+    # 2018 has a lot of missing data
+    energy_data.drop('2018', axis=1, inplace=True)
 
-energy_data.drop(
-    energy_data[energy_data['Country Code'] == 'none'].index, inplace=True)
+    #Original dataset has several rows that are totals of other forms of energy. This section drops the rows of totals so that only renewable energy has subgroups. Several countries are missing a country code and these are specified manually.
+    energy_data['Country Code'].loc[1981:1994] = 'Micronesia'
+    energy_data['Country Code'].loc[2297:2309] = 'MNP'
+    energy_data['Country Code'].loc[3181:3194] = 'Tuvalu'
+    energy_data['Country Code'].loc[3211:3224] = 'U.S. Territories'
+    countries = energy_data['Energy Type'][0::15]
+    energy_data.drop(energy_data.loc[0::15].index, inplace=True)
+    energy_data.drop(energy_data.loc[6::14].index, inplace=True)
+    energy_data.drop(energy_data.loc[8::13].index, inplace=True)
+    energy_data.drop(energy_data.loc[9::12].index, inplace=True)
+    energy_data.reset_index(drop = True, inplace = True)
 
-country_code = []
-for code in energy_data['Country Code']:
-    if code != 'none' and type(code) == str and code.count('-') >= 3:
-        country_code.append(code.split('-')[2])
-    else:
-        country_code.append(code)
+    energy_data.drop(
+        energy_data[energy_data['Country Code'] == 'none'].index, inplace=True)
 
-energy_data['Country Code'] = country_code
-energy_data['Country Code'][energy_data['Country Code'] == 'WORL'] = 'WLD'
-energy_data['Energy Type'] = indent_replace(energy_data['Energy Type'])
-energy_data.fillna(0, inplace=True)
-energy_data.replace('--', 0, inplace = True)
-energy_data.iloc[:, 2:] = energy_data.iloc[:, 2:].astype('float')
+    country_code = []
+    for code in energy_data['Country Code']:
+        if code != 'none' and type(code) == str and code.count('-') >= 3:
+            country_code.append(code.split('-')[2])
+        else:
+            country_code.append(code)
 
-#Countries provides another dataframe to translate country codes into Country Names
-countries.reset_index(drop=True, inplace=True)
-country_code = energy_data['Country Code'].copy()
-country_code.drop_duplicates(inplace=True)
-country_code.reset_index(drop = True, inplace = True)
-countries = pd.DataFrame(country_code).join(countries)
-countries.rename(columns ={'Energy Type': 'Country'}, inplace = True)
-energy_data.merge(countries)
+    energy_data['Country Code'] = country_code
+    energy_data['Country Code'][energy_data['Country Code'] == 'WORL'] = 'WLD'
+    energy_data['Energy Type'] = indent_replace(energy_data['Energy Type'])
+    energy_data.fillna(0, inplace=True)
+    energy_data.replace('--', 0, inplace = True)
+    energy_data.iloc[:, 2:] = energy_data.iloc[:, 2:].astype('float')
 
-#Replace Country codes with country names, combines split countries
-energy_data = energy_data.iloc[:, :1].merge(countries).join(energy_data.iloc[:, 1:])
-energy_data.drop('Country Code', axis=1, inplace = True)
-combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
-combine_countries(energy_data, ['Former Czechoslovakia'], 'Czech Republic')
-combine_countries(energy_data, ['Former U.S.S.R.'], 'Russia')
+    #Countries provides another dataframe to translate country codes into Country Names
+    countries.reset_index(drop=True, inplace=True)
+    country_code = energy_data['Country Code'].copy()
+    country_code.drop_duplicates(inplace=True)
+    country_code.reset_index(drop = True, inplace = True)
+    countries = pd.DataFrame(country_code).join(countries)
+    countries.rename(columns ={'Energy Type': 'Country'}, inplace = True)
+    energy_data.merge(countries)
 
-allcountries = set(energy_data['Country'][1:])
-allcountries.remove("World")
+    #Replace Country codes with country names, combines split countries
+    energy_data = energy_data.iloc[:, :1].merge(countries).join(energy_data.iloc[:, 1:])
+    energy_data.drop('Country Code', axis=1, inplace = True)
+    combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
+    combine_countries(energy_data, ['Former Czechoslovakia'], 'Czech Republic')
+    combine_countries(energy_data, ['Former U.S.S.R.'], 'Russia')
 
-'''
------------------------------------------------------------------
-Import UN HDI data and clean
------------------------------------------------------------------
-'''
-HDI_data = pd.read_csv('data/HDI.csv', nrows=190)
-HDI_data.rename(columns=years_to_int(1990, 2018), inplace=True)
-HDI_data.drop(0, inplace = True)
-HDI_data['Country'] = HDI_data['Country'].str.lstrip()
-HDI_data.drop([HDI_data.columns[x] for x in range(
-    3, len(HDI_data.columns), 2)], axis=1, inplace=True)
-HDI_data.iloc[:, 0] = HDI_data.iloc[:, 0].astype('int')
-HDI_data['Country'].replace(
-    'Hong Kong, China (SAR)', "Hong Kong", inplace=True)
-HDI_data['Country'].replace(
-    'Korea (Republic of)', "South Korea", inplace=True)
-HDI_data['Country'].replace(
-    'Czechia', "Czech Republic", inplace=True)
-HDI_data['Country'].replace(
-    'Russian Federation', "Russia", inplace=True)
-HDI_data['Country'].replace(
-    'Congo (Democratic Republic of the)', "Congo-Kinshasa", inplace=True)
-HDI_data['Country'].replace(
-    'Gambia', "Gambia, The", inplace=True)
-HDI_data['Country'].replace(
-    "Côte d'Ivoire", "Cote dIvoire", inplace=True)
-HDI_data['Country'].replace(
-    'Tanzania (United Republic of)', "Tanzania", inplace=True)
-developed_data = HDI_data.sort_values('HDI Rank')['Country'].reset_index(drop = True)
-developed_countries = list(developed_data)
-'''
------------------------------------------------------------------
-Import population data and clean it
------------------------------------------------------------------
-'''
+    allcountries = set(energy_data['Country'][1:])
+    allcountries.remove("World")
 
-pop_data = pd.read_csv('data/API_SP.POP.csv', header=4)
-pop_data_min_year = 1960
-pop_data.rename(columns=years_to_int(pop_data_min_year), inplace=True)
+    '''
+    -----------------------------------------------------------------
+    Import UN HDI data and clean
+    -----------------------------------------------------------------
+    '''
+    HDI_data = pd.read_csv('data/HDI.csv', nrows=190)
+    HDI_data.rename(columns=years_to_int(1990, 2018), inplace=True)
+    HDI_data.drop(0, inplace = True)
+    HDI_data['Country'] = HDI_data['Country'].str.lstrip()
+    HDI_data.drop([HDI_data.columns[x] for x in range(
+        3, len(HDI_data.columns), 2)], axis=1, inplace=True)
+    HDI_data.iloc[:, 0] = HDI_data.iloc[:, 0].astype('int')
+    HDI_data['Country'].replace(
+        'Hong Kong, China (SAR)', "Hong Kong", inplace=True)
+    HDI_data['Country'].replace(
+        'Korea (Republic of)', "South Korea", inplace=True)
+    HDI_data['Country'].replace(
+        'Czechia', "Czech Republic", inplace=True)
+    HDI_data['Country'].replace(
+        'Russian Federation', "Russia", inplace=True)
+    HDI_data['Country'].replace(
+        'Congo (Democratic Republic of the)', "Congo-Kinshasa", inplace=True)
+    HDI_data['Country'].replace(
+        'Gambia', "Gambia, The", inplace=True)
+    HDI_data['Country'].replace(
+        "Côte d'Ivoire", "Cote dIvoire", inplace=True)
+    HDI_data['Country'].replace(
+        'Tanzania (United Republic of)', "Tanzania", inplace=True)
+    developed_data = HDI_data.sort_values('HDI Rank')['Country'].reset_index(drop = True)
+    developed_countries = list(developed_data)
+    '''
+    -----------------------------------------------------------------
+    Import population data and clean it
+    -----------------------------------------------------------------
+    '''
 
-pop_data.drop(['Unnamed: 64', 'Indicator Name',
-                      'Indicator Code', '2018', '2019'], axis=1, inplace=True)
+    pop_data = pd.read_csv('data/API_SP.POP.csv', header=4)
+    pop_data_min_year = 1960
+    pop_data.rename(columns=years_to_int(pop_data_min_year), inplace=True)
 
-#Removing aggregated regions to avoid double counting
-regions_to_remove = (
-    'Arab World', 'Caribbean small states', 'Central Europe and the Baltics', 'Early-demographic dividend', 'East Asia & Pacific', 'East Asia & Pacific (excluding high income)', 'East Asia & Pacific (IDA & IBRD countries)','Europe & Central Asia (IDA & IBRD countries)', 'Euro area', 'Europe & Central Asia', 'Europe & Central Asia (excluding high income)', 'European Union', 'Fragile and conflict affected situations', 'Heavily indebted poor countries (HIPC)', 'IBRD only', 'IDA & IBRD total', 'IDA total', 'IDA blend', 'IDA only', 'Latin America & Caribbean', 'Latin America & the Caribbean (IDA & IBRD countries)', 'IDA only', 'Late-demographic dividend', 'Latin America & Caribbean (excluding high income)',
-    'Least developed countries: UN classification', 'Middle East & North Africa', 'Middle East & North Africa (excluding high income)', 'Middle East & North Africa (IDA & IBRD countries)', 'North America', 'Not classified', 'OECD members', 'Other small states', 'Pacific island small states', 'Pre-demographic dividend', 'Post-demographic dividend', 'Small states', 'South Asia', 'South Asia (IDA & IBRD)','Sub-Saharan Africa (IDA & IBRD countries)', 'Sub-Saharan Africa', 'Sub-Saharan Africa (excluding high income)', 'High income', 'Low & middle income', 'Low income', 'Lower middle income', 'Middle income', 'Upper middle income')
+    pop_data.drop(['Unnamed: 64', 'Indicator Name',
+                        'Indicator Code', '2018', '2019'], axis=1, inplace=True)
 
-pop_data.drop(pop_data[pop_data['Country Name'].isin(regions_to_remove)].index, inplace=True)
+    #Removing aggregated regions to avoid double counting
+    regions_to_remove = (
+        'Arab World', 'Caribbean small states', 'Central Europe and the Baltics', 'Early-demographic dividend', 'East Asia & Pacific', 'East Asia & Pacific (excluding high income)', 'East Asia & Pacific (IDA & IBRD countries)','Europe & Central Asia (IDA & IBRD countries)', 'Euro area', 'Europe & Central Asia', 'Europe & Central Asia (excluding high income)', 'European Union', 'Fragile and conflict affected situations', 'Heavily indebted poor countries (HIPC)', 'IBRD only', 'IDA & IBRD total', 'IDA total', 'IDA blend', 'IDA only', 'Latin America & Caribbean', 'Latin America & the Caribbean (IDA & IBRD countries)', 'IDA only', 'Late-demographic dividend', 'Latin America & Caribbean (excluding high income)',
+        'Least developed countries: UN classification', 'Middle East & North Africa', 'Middle East & North Africa (excluding high income)', 'Middle East & North Africa (IDA & IBRD countries)', 'North America', 'Not classified', 'OECD members', 'Other small states', 'Pacific island small states', 'Pre-demographic dividend', 'Post-demographic dividend', 'Small states', 'South Asia', 'South Asia (IDA & IBRD)','Sub-Saharan Africa (IDA & IBRD countries)', 'Sub-Saharan Africa', 'Sub-Saharan Africa (excluding high income)', 'High income', 'Low & middle income', 'Low income', 'Lower middle income', 'Middle income', 'Upper middle income')
 
-#Modifying index so that aggregated World row is placed on top, rest are alphabetical order, removing invalid entries
+    pop_data.drop(pop_data[pop_data['Country Name'].isin(regions_to_remove)].index, inplace=True)
 
-pop_data.sort_values('Country Name', inplace=True)
-pop_data.fillna(0, inplace=True)
-pop_data.reset_index(drop = True, inplace = True)
-pop_data.index += 1
-pop_data.loc[0] = pop_data.loc[215]
-pop_data.drop(215, inplace = True)
-pop_data.sort_index(inplace=True)
-pop_data.reset_index(drop=True, inplace=True)
-pop_data.rename(columns = {'Country Name' : 'Country'}, inplace = True)
-pop_data['Country'].replace(
-    'Russian Federation', "Russia", inplace=True)
-pop_data['Country'].replace(
-    'Egypt, Arab Rep.', "Egypt", inplace=True)
-pop_data['Country'].replace(
-    'Iran, Islamic Rep.', "Iran", inplace=True)
-pop_data['Country'].replace(
-    'Korea, Rep.', "South Korea", inplace=True)
-pop_data['Country'].replace(
-    'Congo, Dem. Rep.', "Congo-Kinshasa", inplace=True)
-#pop_data[pop_data['Country Name'] == 'United States']
-'''
---------------------------------------------
-Highest population dataset determined here
---------------------------------------------
-'''
-high_pop = pop_data.sort_values(start_year,ascending = False).copy()[1: countries_to_analyze]
+    #Modifying index so that aggregated World row is placed on top, rest are alphabetical order, removing invalid entries
 
-'''
--------------------------------------------
-Continent Data
--------------------------------------------
-'''
-cont_data = pd.read_csv('data/CountryContent.csv', header = 4)
-cont_data.drop(['4203.93645368'],
-               axis=1, inplace=True)
-cont_data.rename(columns={
-                 'INTL.2-12-USA-BKWH.A': 'Continent', '        United States': 'Country'}, inplace=True)
-cont_data['Country'].replace(
-    'Côte d’Ivoire', "Cote dIvoire", inplace=True)
-cont_data['Continent'].iloc[0:58] = 'Africa'
-cont_data['Continent'].iloc[58:106] = 'Asia & Oceania'
-cont_data['Continent'].iloc[106:152] = 'Central & South America'
-cont_data['Continent'].iloc[152:160] = 'North America'
-cont_data['Continent'].iloc[160:175] = 'Middle East'
-cont_data['Continent'].iloc[175:221] = 'Europe'
-cont_data['Continent'].iloc[221:] = 'Eurasia'
-cont_data['Country'] = cont_data['Country'].str.lstrip()
-cont_data.drop([0, 58, 106, 152, 160, 175, 221], inplace = True)
-cont_data.reset_index(drop = True)
+    pop_data.sort_values('Country Name', inplace=True)
+    pop_data.fillna(0, inplace=True)
+    pop_data.reset_index(drop = True, inplace = True)
+    pop_data.index += 1
+    pop_data.loc[0] = pop_data.loc[215]
+    pop_data.drop(215, inplace = True)
+    pop_data.sort_index(inplace=True)
+    pop_data.reset_index(drop=True, inplace=True)
+    pop_data.rename(columns = {'Country Name' : 'Country'}, inplace = True)
+    pop_data['Country'].replace(
+        'Russian Federation', "Russia", inplace=True)
+    pop_data['Country'].replace(
+        'Egypt, Arab Rep.', "Egypt", inplace=True)
+    pop_data['Country'].replace(
+        'Iran, Islamic Rep.', "Iran", inplace=True)
+    pop_data['Country'].replace(
+        'Korea, Rep.', "South Korea", inplace=True)
+    pop_data['Country'].replace(
+        'Congo, Dem. Rep.', "Congo-Kinshasa", inplace=True)
+    #pop_data[pop_data['Country Name'] == 'United States']
+    '''
+    --------------------------------------------
+    Highest population dataset determined here
+    --------------------------------------------
+    '''
+    high_pop = pop_data.sort_values(start_year,ascending = False).copy()[1: countries_to_analyze]
 
+    '''
+    -------------------------------------------
+    Continent Data
+    -------------------------------------------
+    '''
+    cont_data = pd.read_csv('data/CountryContent.csv', header = 4)
+    cont_data.drop(['4203.93645368'],
+                axis=1, inplace=True)
+    cont_data.rename(columns={
+                    'INTL.2-12-USA-BKWH.A': 'Continent', '        United States': 'Country'}, inplace=True)
+    cont_data['Continent'].iloc[0:58] = 'Africa'
+    cont_data['Continent'].iloc[58:106] = 'Asia & Oceania'
+    cont_data['Continent'].iloc[106:152] = 'Central & South America'
+    cont_data['Continent'].iloc[152:160] = 'North America'
+    cont_data['Continent'].iloc[160:175] = 'Middle East'
+    cont_data['Continent'].iloc[175:221] = 'Europe'
+    cont_data['Continent'].iloc[221:] = 'Eurasia'
+    cont_data['Country'] = cont_data['Country'].str.lstrip()
+    cont_data.drop([0, 58, 106, 152, 160, 175, 221], inplace = True)
+    cont_data.reset_index(drop = True)
+
+    cont_data['Country'].replace("Côte d’Ivoire", "Cote dIvoire", inplace=True)
 
 #Plots found in notebooks/Capstone1Plots.ipynb
 
-if __name__ == '__main__':
+
     Worldwide_Analysis = Analysis(energy_data, title='Worldwide')
     Development_Analysis = Analysis(energy_data, title='Top Developed Countries')
     Development_Analysis.add_countries(developed_countries[:countries_to_analyze], orderby_latest = False)
@@ -442,6 +435,8 @@ if __name__ == '__main__':
 
     print('------------------------------------------')
 
-    Highest_Prop_2017_Analysis = Analysis(energy_data, title = 'Top renewable electricity proportion countries')  
-    Highest_prop_data = Highest_Prop_2017_Analysis.add_countries(allcountries)
-    Highest_prop_data.sort_values(2017, ascending=False, inplace = True)
+    highest_prop_countries = list(calculate_proportions(allcountries).sort_values(
+        2017, ascending=False).loc[:, 2017].iloc[:20].index)
+
+    AllCountries_hist = Analysis(energy_data, 'All Countries in the World')
+    AllCountries_hist.add_countries(allcountries)
