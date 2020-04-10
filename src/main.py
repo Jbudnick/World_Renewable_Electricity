@@ -8,10 +8,11 @@ To Do ++ :
 Convert datasets into objects?
 
 Thursday:
-Clean Code, Work on readme
-
-Need Help:
-With class - how can I have objects interact with one another? Trying to create subplots
+Transfer Continent analysis to jupyter notebook, make subplots and save
+Configure plot axes better
+Finish Readme
+Clean up code
+World map plot
 
 '''
 import numpy as np
@@ -27,18 +28,10 @@ years_analyzed = range(start_year, end_year + 1)
 
 countries_to_analyze = 35
 
-class dataset(object):
-    def __init__(self,data):
-        self.data
-    def clean_data():
-        pass
-    def load_data():
-        pass
-
 class Analysis(object):
-    def __init__(self, data, title = 'untitled'):
-        self.data = data
-        self.year = data.columns[2:]
+    def __init__(self, data, title = 'untitled', startcol = 1980):
+        self.data = data.drop(range(1980, startcol), axis = 1)
+        self.year = data.columns[(startcol-1978):]
         self.title = title
         self.analyze_list = []
         self.countries_analyzed = []
@@ -61,39 +54,34 @@ class Analysis(object):
                 break
         print('Checked all subrows=total row')
 
-    def add_countries(self, country_list):
-        propDF = calculate_proportions(country_list)
+    def add_countries(self, country_list, orderby_latest=True):
+        propDF = calculate_proportions(country_list, orderby_latest=True)
         self.analyze_list = propDF.to_numpy()
         self.countries_analyzed = list(propDF.index)
         return propDF
 
-    # def make_subplots(data_list):
-    # row_plots = (len(data_list) + 1)//2
-    # fig, axes = plt.subplots(row_plots, 2)
-    # for ax, obj in zip(axes.flatten(), data_list):
-    #     ax = plt.plot()
-
-    def plot_data(self, maxlines= 15, include_world = False):
+    def plot_data(self, maxlines= 10, include_world = False):
         self.fig, ax = plt.subplots(1, 1, figsize=(14, 8))
+        if include_world == True:
+            ax.plot(self.year, calculate_proportions(["World"]).to_numpy(
+            ).flatten(), color = 'blue', ls=(0, (10, 12)), linewidth=0.8, label='World')
         for i, y_data_set in enumerate(self.analyze_list[0: maxlines]):
             ax.plot(self.year, y_data_set, label = self.countries_analyzed[i])
-        if include_world == True:
-            ax.plot(self.year, calculate_proportions(["World"]).to_numpy().flatten(), label='World')
         ax.set_ylabel('Proportion of Total Electrcity Generated')
         ax.set_title('Renewable Electricity Produced from {}'.format(self.title))
         ax.legend(loc ='center left', bbox_to_anchor = (1, 0.5))
-        return self.fig
+        return
 
-    def hypo_test(self, aggregated = True, increase_thres = 0.15, alpha = 0.05, subset1 = range(1980, 1983), subset2 = range(2014, 2017)):
+    def hypo_test(self, aggregated = True, increase_thres = 0.15, alpha = 0.05):
         #Use average of 1980 to 1983 and 2014 to 2017 to account for variability
         n = len(self.countries_analyzed)
         subset1_avgs = []
         subset2_avgs = []
 
         for prop in self.analyze_list:
-            country_subset1 = np.mean([prop[list(self.year).index(yr1)] for yr1 in subset1])
+            country_subset1 = np.mean([prop[(yr1 - 1980)] for yr1 in self.year[0:3]])
             subset1_avgs.append(country_subset1)
-            country_subset2 = np.mean([prop[list(self.year).index(yr2)] for yr2 in subset2])
+            country_subset2 = np.mean([prop[list(self.year).index(yr2)] for yr2 in self.year[-3:]])
             subset2_avgs.append(country_subset2)
         if aggregated == True:
             subset1_mean, subset1_stdev = np.mean(subset1_avgs), np.std(subset1_avgs)
@@ -101,9 +89,9 @@ class Analysis(object):
             p = 1 - stats.norm(subset1_mean, subset1_stdev).cdf(subset2_mean)
             print('P-value: ', p)
             if p <= alpha:
-                print("Reject null hypothesis. Evidence suggests that {} are generating a greater proportion of electricity in {} than in {}".format(self.title, end_year, start_year))
+                print("Reject null hypothesis. Evidence suggests that {} are generating a greater proportion of renewable electricity in {} than in {}".format(self.title, self.year[-1], self.year[0]))
             else:
-                print("Fail to reject null hypothesis. Insufficient evidence to suggest that {} are generating a greater proportion of electricity in {} than in {}.". format(self.title, end_year, start_year))
+                print("Fail to reject null hypothesis. Insufficient evidence to suggest that {} are generating a greater proportion of electricity in {} than in {}.". format(self.title, self.year[-1], self.year[0]))
         else:
             counter = 0
             total = 0
@@ -155,12 +143,16 @@ def combine_countries(df, combine_list, into_country):
     return df
 
     #For now only calculates proportion of renewable electricity sources over total - could be modified to include more
+    #Countries with a total electricity generation of 0 on end year are assumed to be missing data and are dropped.
 
-def calculate_proportions(country_list):
+def calculate_proportions(country_list, orderby_latest = True):
     calc_list, countries_calc = [], []
     for country in country_list:
         if country not in set(energy_data['Country']):
             print(country, 'is not in energy data and has been skipped.')
+            continue
+        if float(energy_data[end_year][(energy_data['Country'] == country) & (energy_data['Energy Type'] == 'Generation (billion Kwh)')]) == 0:
+            #print(country, 'has 0 or unknown electricity generation. Skipped')
             continue
 
         renewable_vals = energy_data[(energy_data['Country'] == country) & (energy_data['Energy Type'] == '3.Renewables (billion Kwh)')]
@@ -186,6 +178,8 @@ def calculate_proportions(country_list):
         calc_list.append(renew_proportions)
         countries_calc.append(country)
         RenewDF = pd.DataFrame(calc_list, columns = years_analyzed, index = countries_calc)
+        if orderby_latest == True:
+            RenewDF.sort_values(years_analyzed[-1], ascending = False)
     return RenewDF
 
 def get_improved_countries(countries, improvement_perc=.274, years=years_analyzed, include_early_0s=False):
@@ -196,16 +190,6 @@ def get_improved_countries(countries, improvement_perc=.274, years=years_analyze
         propDF = propDF[propDF[years[0]] != 0]
     propDF.sort_values('Improvement', ascending = False, inplace = True)
     return propDF
-
-# def make_plots(data, subpltrows = 1, subpltcols = 1):
-#     fig, axes = plt.subplots(subpltrows, subpltcols, figsize=(14, 6))
-#     x = data.index
-#     y = [float(data[val]) for val in x]
-#     axes.scatter(x, y)
-#     fig.tight_layout(pad = 3)
-#     axes.grid(True)
-#     return fig, axes
-
 
 def years_to_int(first_year=start_year, last_year=end_year):
     years_to_int = {str(year): year for year in range(
@@ -268,6 +252,7 @@ energy_data = energy_data.iloc[:, :1].merge(countries).join(energy_data.iloc[:, 
 energy_data.drop('Country Code', axis=1, inplace = True)
 combine_countries(energy_data, ['Germany, East', 'Germany, West'], 'Germany')
 combine_countries(energy_data, ['Former Czechoslovakia'], 'Czech Republic')
+combine_countries(energy_data, ['Former U.S.S.R.'], 'Russia')
 
 allcountries = set(energy_data['Country'][1:])
 allcountries.remove("World")
@@ -361,44 +346,40 @@ cont_data.drop(['4203.93645368'],
                axis=1, inplace=True)
 cont_data.rename(columns={
                  'INTL.2-12-USA-BKWH.A': 'Continent', '        United States': 'Country'}, inplace=True)
+cont_data['Country'].replace(
+    'Côte d’Ivoire', "Cote dIvoire", inplace=True)
 cont_data['Continent'].iloc[0:58] = 'Africa'
-cont_data['Continent'].iloc[0:106] = 'Asia & Oceania'
+cont_data['Continent'].iloc[58:106] = 'Asia & Oceania'
 cont_data['Continent'].iloc[106:152] = 'Central & South America'
 cont_data['Continent'].iloc[152:160] = 'North America'
 cont_data['Continent'].iloc[160:175] = 'Middle East'
 cont_data['Continent'].iloc[175:221] = 'Europe'
 cont_data['Continent'].iloc[221:] = 'Eurasia'
 cont_data['Country'] = cont_data['Country'].str.lstrip()
-cont_data.drop([58, 106, 152, 160, 175, 221], inplace = True)
+cont_data.drop([0, 58, 106, 152, 160, 175, 221], inplace = True)
 cont_data.reset_index(drop = True)
+
+
+#Plots found in notebooks/Capstone1Plots.ipynb
 
 if __name__ == '__main__':
     Worldwide_Analysis = Analysis(energy_data, title='Worldwide')
-    Worldwide_Analysis.add_countries(['World'])
-    Worldwide_Analysis.plot_data()
-
-    print('------------------------------------------')
-
     Development_Analysis = Analysis(energy_data, title='Top Developed Countries')
-    developed_countries.insert(0,'World')
-    Development_Analysis.add_countries(developed_countries[:countries_to_analyze])
+    Development_Analysis.add_countries(developed_countries[:countries_to_analyze], orderby_latest = False)
     Development_Analysis.hypo_test()
-    Development_Analysis.plot_data()
-    # Development_Analysis.hypo_test(aggregated = False)
+    Development_Analysis.hypo_test(aggregated = False)    
 
     print('------------------------------------------')
 
     Least_Dev_Analysis = Analysis(energy_data, title = 'Least Developed Countries')
     Least_Dev_Analysis.add_countries(
-        developed_countries[-1: -1 * countries_to_analyze: -1])
-    Least_Dev_Analysis.plot_data()
+        developed_countries[-1: -1 * countries_to_analyze: -1], orderby_latest = False)
     Least_Dev_Analysis.hypo_test()
 
     print('------------------------------------------')
 
     HighPop_Analysis = Analysis(energy_data, 'Countries with Largest Population')
-    HighPop_Analysis.add_countries(list(high_pop['Country']))
-    HighPop_Analysis.plot_data()
+    HighPop_Analysis.add_countries(list(high_pop['Country']), orderby_latest= False)
     HighPop_Analysis.hypo_test()
 
     print('------------------------------------------')
@@ -406,24 +387,61 @@ if __name__ == '__main__':
     North_America_Analysis = Analysis(energy_data, 'North American Countries')
     North_America_Analysis.add_countries(
         cont_data[cont_data['Continent'] == 'North America'].loc[:, 'Country'])
-    North_America_Analysis.plot_data()
     North_America_Analysis.hypo_test()
 
     print('------------------------------------------')
 
-    Europe_Analysis = Analysis(energy_data, 'European Countries')
+    South_America_Analysis = Analysis(energy_data, 'Central & South American Countries')
+    South_America_Analysis.add_countries(cont_data[cont_data['Continent'] == 'Central & South America'].loc[:, 'Country'])
+    South_America_Analysis.hypo_test()
+
+    print('------------------------------------------')
+
+    Europe_Analysis = Analysis(energy_data, 'European Top Countries')
     Europe_Analysis.add_countries(
         cont_data[cont_data['Continent'] == 'Europe'].loc[:, 'Country'])
-    Europe_Analysis.plot_data()
     Europe_Analysis.hypo_test()
 
     print('------------------------------------------')
 
-    Improved_Analysis = Analysis(energy_data, 'Largest Increase')
-    Improved_Analysis.add_countries(get_improved_countries(allcountries, improvement_perc=.274).index)
+#These countries split from USSR in 1992 - using that column instead of 1980
+    Eurasia_Analysis = Analysis(energy_data, title ='Eurasia Top Countries', startcol = 1992)
+    Eurasia_Analysis.add_countries(
+        cont_data[cont_data['Continent'] == 'Eurasia'].loc[:, 'Country'])
+    Eurasia_Analysis.hypo_test()
+
+    print('------------------------------------------')
+
+    Asia_Analysis = Analysis(
+        energy_data, 'Asia & Oceania Countries')
+    Asia_Analysis.add_countries(
+        cont_data[cont_data['Continent'] == 'Asia & Oceania'].loc[:, 'Country'])
+    Asia_Analysis.hypo_test()
+
+    print('------------------------------------------')
+
+    MidEast_Analysis = Analysis(
+        energy_data, 'Middle East Countries')
+    MidEast_Analysis.add_countries(
+        cont_data[cont_data['Continent'] == 'Middle East'].loc[:, 'Country'])
+    MidEast_Analysis.hypo_test()
+
+    print('------------------------------------------')
+
+    Africa_Analysis = Analysis(
+        energy_data, 'African Countries')
+    Africa_Analysis.add_countries(
+        cont_data[cont_data['Continent'] == 'Africa'].loc[:, 'Country'])
+    Africa_Analysis.hypo_test()
+
+    print('------------------------------------------')
+
+    Improved_Analysis = Analysis(energy_data, 'Largest Increase Countries')
+    Improved_Analysis.add_countries(get_improved_countries(allcountries, improvement_perc=.27).index)
     Improved_Analysis.hypo_test()
 
     print('------------------------------------------')
+
     Highest_Prop_2017_Analysis = Analysis(energy_data, title = 'Top renewable electricity proportion countries')  
     Highest_prop_data = Highest_Prop_2017_Analysis.add_countries(allcountries)
     Highest_prop_data.sort_values(2017, ascending=False, inplace = True)
