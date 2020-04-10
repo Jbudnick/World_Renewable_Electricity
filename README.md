@@ -23,9 +23,12 @@ Are the most developed countries in the world transitioning to renewable resourc
 
 My null hypothesis is that there is no difference in the proportion of electricity produced from renewable resources to total generation in 2017 of developed countries was the same or less than it was in 1980. My alternative hypothesis is that the proportion is greater in 2017. I used a significance level of 5%.
 
-I also ran a hypothesis test for regions of the world to determine if there was enough statistical significance to suggest that the proportion was higher in 2017 than 1980 for the specified regions.
+I also ran a hypothesis test for regions of the world to determine if there was enough statistical significance to suggest that the proportion was higher in 2017 than 1980 for countries of higher populations, North America, Central/South America, Europe, Eurasia, Middle East, Asia/Oceania, and Africa.
 
 # Exploratory Data Analysis
+
+For the subsets of countries that were explored, only the top ten countries for each attribute were shown in plots for subsets that contained more than ten countries. However, the hypothesis tests took into account all countries in each particular group.
+
 ![Image](images/Developed.png)
 
  The main goal of this project was to investigate the top developed countries. The top ten developed countries and their proportions are plotted above. There is a very wide spread but some increases. Since there is some variance in the data, I took the data from 1980 to 1983 and averaged it, using this as the before value, and averaged the data from 2014 to 2017 as the after value of each country. I then used these values for the top 35 most developed countries in the world in my hypothesis test.
@@ -36,11 +39,13 @@ I also ran a hypothesis test for regions of the world to determine if there was 
 
 ![Image](images/lessDevelop.png)
 
- After my finds from the most developed countries in the world, I was curious to see what I would find when testing a subset of the least developed countries in the world. I found that there is a wide spread here as well, but there are many countries with a very small proportion. The hypothesis test on this data yielded a value of 0.509, much too high to reject the null hypothesis.
+ After my finds from the most developed countries in the world, I was curious to see what I would find when testing a subset of the 35 least developed countries in the world. I found that there is a wide spread here as well, but there are many countries with a very small proportion. The hypothesis test on this data yielded a value of 0.509, much too high to reject the null hypothesis.
 
 ![Image](images/HighPop.png)
 
  Looking at countries with the highest population in the world, there does not appear to be much improvement over the years as well. Running a hypothesis test with the aggregated data of this subset returned a P-value of 0.53, which makes sense with the data shown.
+
+ For the following regional plots, only the top ten are included (ordered based on 2017 proportions, high to low). 
 
 ![Image](images/NA.png)
 
@@ -74,6 +79,12 @@ P - value = 0.65
 Looking at Asia/Oceania countries, again, there seems to be a great deal of fluctuation as well. 
 
 P - value: 0.461
+
+![Image](images/Africa.png)
+
+In Africa, the top 10 countries show a lot of fluctuation, but no clear upwards or downwards trend.
+
+P = 0.541
 
 ![Image](images/Hist.png)
 
