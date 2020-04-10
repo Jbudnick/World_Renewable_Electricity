@@ -41,6 +41,8 @@ class Analysis(object):
 
     def add_countries(self, country_list, orderby_latest=True):
         self.propDF = calculate_proportions(country_list, orderby_latest=True)
+        if orderby_latest == True:
+            self.propDF.sort_values(self.year[-1], ascending = False, inplace = True)
         self.analyze_list = self.propDF.to_numpy()
         self.countries_analyzed = list(self.propDF.index)
         return self.propDF
@@ -440,3 +442,5 @@ if __name__ == '__main__':
 
     AllCountries_hist = Analysis(energy_data, 'All Countries in the World')
     AllCountries_hist.add_countries(allcountries)
+
+
