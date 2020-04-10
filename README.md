@@ -74,13 +74,15 @@ A histogram of the countries of the world shows not much improvement over the ye
 
 ![Image](images/map.png)
 
-Since i was unable to reject my null hypothesis in any of these subsets of countries, I explored just how much of an improvement we would need to see in order to reject the null hypothesis. To do this, I pulled a subset of the countries with the greatest increase in proportion over the time period. In order to get a p-value of less than 0.05, I had to pull a subset of countries that observed at least a 27% increase in proportion - only 11 countries in the world have had this much of an improvement!
+I plotted the countries with the top 10 highest proportions in 2017 on this map. Although there are a couple that are clustered in one section, there is a very large spread all around the world. Some of the countries in the top 10 are developed, some are developing.
+
+Since I was unable to reject my null hypothesis in any of these subsets of countries, I explored just how much of an improvement we would need to see in order to reject the null hypothesis. To do this, I pulled a subset of the countries with the greatest increase in proportion over the time period. In order to get a p-value of less than 0.05, I had to pull a subset of countries that observed at least a 27% increase in proportion - only 11 countries in the world have had this much of an improvement!
 
 # Conclusion
 
 Unfortunately, it looks like there is not sufficient evidence to support the claim that countries around the world are producing a greater proportion of renewable electrity to total electrical generation. Although some regions ended up with a lower P-value and therefore were closer than others to rejecting the null hypothesis, the differences found were not statistically significant enough to reject the null hypothesis.
 
-I find this conclusion alarming, as our resources are rapidly diminishing. Although the dataset's most recent complete data is from 2017, hopefully an upward trend will result through the coming years and the world can move towards a more sustainable future.
+I find this conclusion alarming, as our resources are rapidly diminishing and was hoping to see more of a change throughout the world. Although the dataset's most recent complete data is from 2017, hopefully an upward trend will occur through the coming years and the world can move towards a more sustainable future.
 
 # Data Sources: 
 World Energy Use:
