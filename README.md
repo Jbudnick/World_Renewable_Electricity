@@ -5,7 +5,7 @@ This day in age, we are more dependent on electricity than ever before, and that
 # Data + Cleaning
 I used three datasets for this study, each of which needed to be cleaned. The Energy Information Administration (EIA) has released a dataset of the types and quantity of electricity generation of countries around the world from years 1980 to 2017, which was the main resource I used for this study. An issue I came across was indented strings as row entries in the energy dataset used to represent different data based on the indentation, which  and many missing values. Missing data values were assumed to be zero. Also, many countries since 1980 have changed names, dissolved into other countries, and were slightly different between datasets, making it difficult to link data from one to the other. This was definitely the most time consuming aspect of this project, but my code can now analyze and make plots and histograms for any list of countries that are inputted. 
 
-![Image](images/energy.png)
+![Image](images/Energy.png)
 
  I also used the United Nations Human Development Index to take a sample of the most highly developed countries in the world for my analysis. My primary goal of this study was to determine if the countries that have the resources to do so are transitioning to renewable resources for electricity, and I believe that the development index is a good indicator of that. This dataset for some reason contained empty columns in every other column, which were easily dropped. The only struggle with this dataset is the names of some countries are spelled slightly different than the other dataset, making linking them for analysis somewhat difficult. My code outputs a message when a country isn't found, so I can rename them between datasets so that they are consistent. 
 
@@ -72,7 +72,7 @@ P - value: 0.461
 
 A histogram of the countries of the world shows not much improvement over the years, as well. It does appear that, at the lower end, the number of countries that produce 0% of their electricity with renewable resources seems to dropping.
 
-![Image](images/map.png)
+![Image](images/Map.png)
 
 I plotted the countries with the top 10 highest proportions in 2017 on this map. Although there are a couple that are clustered in one section, there is a very large spread all around the world. Some of the countries in the top 10 are developed, some are developing.
 
