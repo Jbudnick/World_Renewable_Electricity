@@ -78,11 +78,13 @@ P - value: 0.461
 
 A histogram of the countries of the world shows not much improvement over the years, as well. It does appear that, at the lower end, the number of countries that produce 0% of their electricity with renewable resources seems to dropping. This could be due to the fact that more data is available in recent years.
 
-![Image](MostImprove.png)![Image](images/Max_Increase.png)
+![Image](images/MostImp.png) 
 
 Since I was unable to reject my null hypothesis in any of these subsets of countries, I explored just how much of an improvement we would need to see in order to reject the null hypothesis. To do this, I created a subset of the countries with the greatest increase in proportion over the time period. In order to get a p-value of less than 0.05, I had to pull a subset of countries that observed at least a 27% increase in proportion - only 11* countries in the world have had this much of an improvement!
 
 *Countries that began with 0 or no data were ommitted.
+
+![Image](images/Max_Increase.png)
 
 ![Image](images/Map.png)
 
