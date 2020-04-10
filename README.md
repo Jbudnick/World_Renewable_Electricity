@@ -33,17 +33,23 @@ I also ran a hypothesis test for regions of the world to determine if there was 
 
  I performed a slightly hypothesis test on this data as well. I counted whether each country in the dataset improved their proportion by at least 15% in the time period. Then, I used this in a binomial test, with a null hypothesis that equal or less than 50% of developed countries have improved their renewable proportion by at least 15%, and an alternative hypothesis that more than 50% (the majority) of countries are making the change. I obtained a p-value of .059, which is close, but still too high to reject with a significance level of 5%, so I failed to reject the null hypothesis in this case as well.
 
+![Image](images/lessDevelop.png)
+
+ After my finds from the most developed countries in the world, I was curious to see what I would find when testing a subset of the least developed countries in the world. I found that there is a wide spread
+
 ![Image](images/HighPop.png)
 
-Looking at countries with the highest population in the world, there does not appear to be much improvement over the years as well. Running a hypothesis test with the aggregated data of this subset returned a P-value of 0.53, which makes sense with the data shown.
+ Looking at countries with the highest population in the world, there does not appear to be much improvement over the years as well. Running a hypothesis test with the aggregated data of this subset returned a P-value of 0.53, which makes sense with the data shown.
 
 ![Image](images/NA.png)
 
-In the North American subset of countries, again, not much of a difference between the years. P-value = 0.33
+ In the North American subset of countries, again, not much of a difference between the years with one exception. Since this subset is made up of a smaller set of countries, a normal distribution using the aggregated subgroup may not be best approximation, but using it anyway yields a P-value = 0.33.
+
+I also evaluated this using a binomial test for each individual country with an improvement threshold of 15%, which resulted in a P-value of 0.8125. This is also way too high to reject the null hypothesis.
 
 ![Image](images/SA.png)
 
-It does appear that the top South American countries have high proportions, but there is a lot of fluctuations and few drastic changes in each specfic country.
+It does appear that the top South and Central American countries have high proportions, but there is a lot of fluctuations and few drastic changes in each specfic country.
 P-value = 0.495
 
 ![Image](images/EU.png)
@@ -58,7 +64,7 @@ P - value (from 1992 onward) : 0.485
 
 ![Image](images/MidE.png)
 
-The Middle East shows a strong negative trend, and that less renewable resources are being used for electricity. Since the middle east is home to many oil reserves, it makes sense they would use that instead of seeking renewable resources instead. The high P-value is consistent with this.
+The Middle East shows a strong negative trend, and that less renewable resources are being used for electricity. Since the middle east is home to many of the world's oil reserves, it makes sense they would use that instead of seeking renewable resources instead. The high P-value is consistent with this.
 
 P - value = 0.65
 
@@ -70,21 +76,25 @@ P - value: 0.461
 
 ![Image](images/Hist.png)
 
-A histogram of the countries of the world shows not much improvement over the years, as well. It does appear that, at the lower end, the number of countries that produce 0% of their electricity with renewable resources seems to dropping.
+A histogram of the countries of the world shows not much improvement over the years, as well. It does appear that, at the lower end, the number of countries that produce 0% of their electricity with renewable resources seems to dropping. This could be due to the fact that more data is available in recent years.
+
+![Image](MostImprove.png)![Image](images/Max_Increase.png)
+
+Since I was unable to reject my null hypothesis in any of these subsets of countries, I explored just how much of an improvement we would need to see in order to reject the null hypothesis. To do this, I created a subset of the countries with the greatest increase in proportion over the time period. In order to get a p-value of less than 0.05, I had to pull a subset of countries that observed at least a 27% increase in proportion - only 11* countries in the world have had this much of an improvement!
+
+*Countries that began with 0 or no data were ommitted.
 
 ![Image](images/Map.png)
 
-I plotted the countries with the top 10 highest proportions in 2017 on this map. Although there are a couple that are clustered in one section, there is a very large spread all around the world. Some of the countries in the top 10 are developed, some are developing.
-
-Since I was unable to reject my null hypothesis in any of these subsets of countries, I explored just how much of an improvement we would need to see in order to reject the null hypothesis. To do this, I pulled a subset of the countries with the greatest increase in proportion over the time period. In order to get a p-value of less than 0.05, I had to pull a subset of countries that observed at least a 27% increase in proportion - only 11 countries in the world have had this much of an improvement!
-
-![Image](images/Max_Increase.png)
+I plotted the countries with the top 10 highest proportions in 2017 on this map. Although there are a couple that are clustered in one section, there is a very large spread all around the world. Some of the countries in the top 10 are developed, some are developing, and there are countries from numerous different continents represented here.
 
 # Conclusion
 
 Unfortunately, it looks like there is not sufficient evidence to support the claim that countries around the world are producing a greater proportion of renewable electrity to total electrical generation. Although some regions ended up with a lower P-value and therefore were closer than others to rejecting the null hypothesis, the differences found were not statistically significant enough to reject the null hypothesis.
 
-I find this conclusion alarming, as our resources are rapidly diminishing and was hoping to see more of a change throughout the world. Although the dataset's most recent complete data is from 2017, hopefully an upward trend will occur through the coming years and the world can move towards a more sustainable future.
+The countries with the top ten proportions were widespread and it looks like the use of renewable resources may be better attributed to factors such as access to technology and use of electricity - perhaps future analaysis could explore country subsets based on their use of electricity. 
+
+I find this conclusion alarming, as our resources are rapidly diminishing and I was hoping to see more of a change throughout the world. Although the dataset's most recent complete data is from 2017, hopefully an upward trend will occur through the coming years and the world can move towards a more sustainable future.
 
 # Data Sources: 
 World Energy Use:
