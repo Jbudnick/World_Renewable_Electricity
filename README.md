@@ -78,6 +78,19 @@ I plotted the countries with the top 10 highest proportions in 2017 on this map.
 
 Since I was unable to reject my null hypothesis in any of these subsets of countries, I explored just how much of an improvement we would need to see in order to reject the null hypothesis. To do this, I pulled a subset of the countries with the greatest increase in proportion over the time period. In order to get a p-value of less than 0.05, I had to pull a subset of countries that observed at least a 27% increase in proportion - only 11 countries in the world have had this much of an improvement!
 
+Country         % Increase from 1980 to 2017
+Denmark           0.740
+Luxembourg        0.635
+Bhutan            0.625
+Belize            0.521
+Ecuador           0.439
+Guatemala         0.406
+United Kingdom    0.309
+Germany           0.308
+Uruguay           0.295
+Guinea            0.280
+Ethiopia          0.273
+
 # Conclusion
 
 Unfortunately, it looks like there is not sufficient evidence to support the claim that countries around the world are producing a greater proportion of renewable electrity to total electrical generation. Although some regions ended up with a lower P-value and therefore were closer than others to rejecting the null hypothesis, the differences found were not statistically significant enough to reject the null hypothesis.

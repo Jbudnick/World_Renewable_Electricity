@@ -104,9 +104,6 @@ class Analysis(object):
             else:
                 print("Fail to reject null hypothesis. Insufficient evidence to suggest that more than 50% of countries have increased renewable electricity generation by at least {} % in the time period".format(100*increase_thres))
 
-#The original energy data is formatted with leading spaces to identify subgroups of each type. This function iterates through and replaces these using numerical indexing for readbility in DataFrames.
-
-#Assumptions - "--" or NaN means that no data is available for the time period. These will be replaced with 0. 
 def indent_replace(a_series):
     new_series = []
     for string in a_series:
@@ -198,7 +195,10 @@ if __name__ == '__main__':
     -----------------------------------------------------------------
     Import electricity generation data and clean it
     -----------------------------------------------------------------
+    The original energy data is formatted with leading spaces to identify subgroups of each type. This function iterates through and replaces these using numerical indexing for readbility in DataFrames.
+    Assumptions - "--" or NaN means that no data is available for the time period. These will be replaced with 0. 
     '''
+
     energy_data = pd.read_csv('data/INT-Export-04-05-2020_00-10-38.csv', header=1)
     energy_data.rename(columns={'Unnamed: 1': 'Energy Type', 'API': 'Country Code'}, inplace = True)
     energy_data.rename(columns = years_to_int(), inplace=True)
@@ -324,7 +324,6 @@ if __name__ == '__main__':
         'Korea, Rep.', "South Korea", inplace=True)
     pop_data['Country'].replace(
         'Congo, Dem. Rep.', "Congo-Kinshasa", inplace=True)
-    #pop_data[pop_data['Country Name'] == 'United States']
     '''
     --------------------------------------------
     Highest population dataset determined here
@@ -355,7 +354,7 @@ if __name__ == '__main__':
 
     cont_data['Country'].replace("Côte d’Ivoire", "Cote dIvoire", inplace=True)
 
-#Plots found in notebooks/Capstone1Plots.ipynb
+    #Plots found in notebooks/Capstone1Plots.ipynb
 
 
     Worldwide_Analysis = Analysis(energy_data, title='Worldwide')
