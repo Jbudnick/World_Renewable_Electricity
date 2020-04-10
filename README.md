@@ -88,7 +88,7 @@ I find this conclusion alarming, as our resources are rapidly diminishing and wa
 
 # Data Sources: 
 World Energy Use:
-​https://www.eia.gov/international/data/world
+​https://www.eia.gov/international/data/world 
 
 World Population:
 https://data.worldbank.org/indicator/sp.pop.totl
