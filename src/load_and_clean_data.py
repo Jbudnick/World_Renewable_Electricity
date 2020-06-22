@@ -2,11 +2,21 @@ import pandas as pd
 import numpy as np
 
 def years_to_int(first_year, last_year):
+    '''
+    Converts years (stored as string) into integers
+    '''
     years_to_int = {str(year): year for year in range(
         first_year, last_year + 1)}
     return years_to_int
 
 def indent_replace(a_series):
+    '''
+    Original Data in dataframe is organized by indentations as opposed to separate columns for categories. This function converts the indentations.
+        Parameters:
+            a_series (Pandas Series): Series that consists of the column that should be divided based on indentations
+        Returns:
+            Series with only data in the proper category for countries
+    '''
     new_series = []
     for string in a_series:
         no_indent = string.lstrip()
@@ -27,6 +37,16 @@ def indent_replace(a_series):
 
 
 def combine_countries(df, years_analyzed, combine_list, into_country):
+    '''
+    Combines countries into one
+        Parameters:
+            df(Pandas DataFrame): Main dataframe with country info
+            years_analyzed(Range)
+            combine_list(list of strings): List of countries to combine with into_country (and then to remove from df)
+            into_country(str): Country to combine countries into
+        Returns:
+            df (Pandas Dataframe): DataFrame with countries combined
+    '''
     into_data = df[df['Country'] == into_country].loc[:, years_analyzed]
     into_rows = into_data.index
     into_country_data = into_data.to_numpy()
@@ -43,6 +63,13 @@ def electricity_generation_data_import(start_year, end_year):
     Import electricity generation data and clean it
     The original energy data is formatted with leading spaces to identify subgroups of each type. This function iterates through and replaces these using numerical indexing for readbility in DataFrames.
     Assumptions - "--" or NaN means that no data is available for the time period. These will be replaced with 0.
+
+        Parameters:
+            start_year(int): Starting year for analysis
+            end_year(int): Ending year for analysis
+        Returns:
+            energy_data (Pandas DataFrame): Dataframe with electrical generation data over years for all countries
+            allcountries(list): All countries included in dataset
     '''
 
     energy_data = pd.read_csv(
@@ -108,7 +135,8 @@ def electricity_generation_data_import(start_year, end_year):
 
 def HDI_data_import():
     '''
-    Import UN HDI data and clean
+    Returns:
+        Cleaned UN HDI data for all countries
     '''
     HDI_data = pd.read_csv('data/HDI.csv', nrows=190)
     HDI_data.rename(columns=years_to_int(1990, 2018), inplace=True)
@@ -141,11 +169,15 @@ def HDI_data_import():
 
 def population_data_import(start_year, end_year, countries_to_analyze):
     '''
-    -----------------------------------------------------------------
     Import population data and clean it
-    -----------------------------------------------------------------
+        Parameters:
+            start_year(int): Starting year for analysis
+            end_year(int): Ending year for analysis
+            countries_to_analyze(int): Maximum number of countries to analyze
+        Returns:
+            pop_data (Pandas DataFrame): DataFrame sorted by countries with highest populations
+            high_pop (List): List of countries with highest populations
     '''
-
     pop_data = pd.read_csv('data/API_SP.POP.csv', header=4)
     pop_data_min_year = 1960
     pop_data.rename(columns=years_to_int(
@@ -195,7 +227,8 @@ def population_data_import(start_year, end_year, countries_to_analyze):
 
 def continent_data_import():
     '''
-    Continent Data
+    Returns:
+        cont_data(Pandas DataFrame): Dataframe grouping all countries into the respective continent.
     '''
     cont_data = pd.read_csv('data/CountryContent.csv', header=4)
     cont_data.drop(['4203.93645368'],

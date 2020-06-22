@@ -3,10 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-#The analysis class will allow a user to, after defining, add a list of countries. These will then be converted into proportions and can be plotted and/or used for a hypothesis test of whether the proportions have increased over the years.
 
 class Analysis(object):
+    '''
+    The analysis class will allow a user to add a list of countries. These will then be converted into proportions and can be plotted and/or used for a hypothesis test of whether the proportions have increased over the years.
+    '''
     def __init__(self, data, title='untitled', startcol=1980, end_year = 2017):
+        '''
+        Parameters:
+        data(pandas DataFrame): Electrical Energy Generation dataframe
+        title (str): designate a title for plotting the data
+        startcol (int): Starting year for analysis
+        end_year: Ending year for analysis
+        '''
         self.data = data.drop(range(1980, startcol), axis=1)
         self.start_year = startcol
         self.end_year = end_year
@@ -16,10 +25,19 @@ class Analysis(object):
         self.countries_analyzed = []
 
     def show_countries(self, for_analysis='T'):
+        '''
+            Parameters:
+                for_analysis (bool): If T, will show only countries in analysis object. If F, will show all countries in dataset
+            Returns:
+                countries_analyzed or all countries
+        '''
         return self.countries_analyzed if for_analysis == 'T' else set(self.data.loc[:, 'Country'])
 
-    #Check that the aggregated rows equal the sum of the subset rows
+    
     def check_aggregates(self, country='Norway', start_year=1980, end_year=2017):
+        '''
+        Check that the aggregated rows equal the sum of the subset rows - used for development only as sanity check, not used in analysis
+        '''
         print('Checking Renewable subrows = renewable total row')
         for each in range(start_year, end_year + 1):
             if round(self.data[self.data['Country'] == country].loc[:, each].iloc[4:10].sum(), 3) != round(self.data[self.data['Country'] == country].loc[:, each].iloc[3], 3):
@@ -34,6 +52,14 @@ class Analysis(object):
         print('Checked all subrows=total row')
 
     def add_countries(self, country_list, orderby_latest=True):
+        '''
+        Add more countries to Analysis class
+            Parameters:
+                country_list(list): List of countries to add
+                orderby_latest(bool): Make latest data appear first
+            returns:
+                self.propDF(Pandas DataFrame): Revised DataFrame with countries added, with proportions applied
+        '''
         self.propDF = calculate_proportions(self.data, self.start_year, self.end_year, country_list, orderby_latest=True)
         if orderby_latest == True:
             self.propDF.sort_values(
@@ -43,6 +69,14 @@ class Analysis(object):
         return self.propDF
 
     def plot_data(self, figsize=(14, 8), maxlines=10, include_world=False, include_legend=True):
+        '''
+        Plot data in class
+            Parameters:
+                maxlines(int): Maximum number of countries to show
+                include_world(bool): Include the aggregated world plot
+            Returns:
+                self.fig(plot)
+        '''
         self.fig, ax = plt.subplots(1, 1, figsize=figsize)
         if include_world == True:
             ax.plot(self.year, calculate_proportions(["World"]).to_numpy().flatten()[
@@ -58,6 +92,9 @@ class Analysis(object):
         return self.fig
 
     def make_hist(self, figsize=(12, 8)):
+        '''
+        Create histogram of data in class
+        '''
         self.fig, ax = plt.subplots(1, 1, figsize=figsize)
         ax.hist([self.propDF[self.year[0]], self.propDF[self.year[20]],
                  self.propDF[self.year[-1]]], label=[self.year[0], self.year[20], self.year[-1]])
@@ -67,6 +104,15 @@ class Analysis(object):
         return self.fig
 
     def hypo_test(self, aggregated=True, increase_thres=0.15, alpha=0.05):
+        '''
+        Run hypothesis test on data to test for improvement over the years
+            Parameters:
+                aggregated(bool): If true, test for group of countries data as a whole region. If False, test each individual country in the region and determine if the majority of countries show improvement.
+                increase_thres(float): The minimum amount of improvement (0.15 = 15%) needed to classify if the country has increased renewable electricity generation or not (only used when aggregated is false)
+                alpha (float): The significance level for rejecting the null hypothesis (0.05 = 5%)
+            Returns:
+                printed statement of test result
+        '''
         #Use average of 1980 to 1983 and 2014 to 2017 to account for variability
         n = len(self.countries_analyzed)
         subset1_avgs = []
@@ -112,6 +158,18 @@ class Analysis(object):
 
 
 def calculate_proportions(energy_data, start_year, end_year, country_list, orderby_latest=True):
+    '''
+    Convert data to proportion of renewable energy to total energy generated
+        Parameters:
+            energy_data(Pandas DataFrame): Main dataframe imported for electricity generation of all countries
+            start_year(int): Starting year for analysis
+            end_year(int): Ending year for analysis
+            country_list(list): List of countries to include in result
+            orderby_latest(bool): Show most recent data first
+        Returns:
+            RenewDF(Pandas Dataframe): DataFrame of countries in country_list of proportions from start_year to end_year
+
+    '''
     calc_list, countries_calc = [], []
     for country in country_list:
         if country not in set(energy_data['Country']):
@@ -153,6 +211,18 @@ def calculate_proportions(energy_data, start_year, end_year, country_list, order
     return RenewDF
 
 def get_improved_countries(energy_data, countries, years, improvement_perc=.274, include_early_0s=False):
+    '''
+    Get list of countries that have shown a certain percentage of improvement over the years in renewable electrical energy generation
+        Parameters:
+            energy_data(Pandas DataFrame): Main dataframe of all electrical generation data
+            countries(list): All countries to consider
+            years (range/list): Starting year to ending year
+            improvement_perc (float): Minimum amount of improvement needed to include in final dataset from countries (0.274 = 27.4%)
+            include_early_0s(bool): Eliminates data with 0 electrical generation values in starting year - assumed to be missing
+        Returns:
+            prop_DF (Pandas DataFrame): DataFrame of countries that have met the improvement_perc improvement over the years.
+
+    '''
     propDF = calculate_proportions(energy_data, start_year = years[0], end_year = years[-1], country_list = countries)
     propDF['Improvement'] = propDF[years[-1]] - propDF[years[0]]
     propDF = propDF[propDF['Improvement'] >= improvement_perc]
@@ -162,6 +232,19 @@ def get_improved_countries(energy_data, countries, years, improvement_perc=.274,
     return propDF
 
 def print_analyses(energy_data, cont_data, years_analyzed, developed_countries, allcountries, high_pop, countries_to_analyze):
+    '''
+    Prints hypothesis test results for all subgroups of data
+        Parameters:
+            energy_data (Pandas DataFrame)
+            cont_data(Pandas DataFrame)
+            years_analyzed(range): Range from minimum to maximum year of analysis
+            developed_countries(Pandas DataFrame): DataFrame sorted based on level HDI
+            allcountries(list): All countries
+            high_pop(Pandas DataFrame): DataFrame sorted based on population
+            countries_to_analyze(int): Maximum number of countries in each category to include in analysis
+        Returns:
+            Printed hypothesis results
+    '''
     print('------------------------------------------')
 
     Least_Dev_Analysis = Analysis(

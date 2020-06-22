@@ -25,7 +25,7 @@ Based on the aggregated proportion of renewable electricity proprtion of all cou
 
 Are the most developed countries in the world transitioning to renewable resources for electricity?
 
-My null hypothesis is that there is no difference in the proportion of electricity produced from renewable resources to total generation in 2017 of developed countries was the same or less than it was in 1980. My alternative hypothesis is that the proportion is greater in 2017. I used a significance level of 5%. Since 12 tests were run on this data, a Bonferroni Correction can be made to divide this significance level by 11, resulting in a corrected level of 0.42%.
+My null hypothesis is that there is no difference in the proportion of electricity produced from renewable resources to total generation in 2017 of developed countries was the same or less than it was in 1980. My alternative hypothesis is that the proportion is greater in 2017. I used a significance level of 5%. Since 12 tests were run on this data, a Bonferroni Correction can be made to divide this significance level by 11, resulting in a corrected level of 0.42%. This significance level is extremely conservative and make it nearly impossible to reject the null hypothesis. Since the consequences of a type 1 error (incorrectly rejecting the null hypothesis) are not dire, a significance level of 5% may be a better choice.
 
 I also ran a hypothesis test for regions of the world to determine if there was enough statistical significance to suggest that the proportion was higher in 2017 than 1980 for countries of higher populations, North America, Central/South America, Europe, Eurasia, Middle East, Asia/Oceania, and Africa.
 
