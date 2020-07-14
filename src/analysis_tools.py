@@ -8,7 +8,7 @@ class Analysis(object):
     '''
     The analysis class will allow a user to add a list of countries. These will then be converted into proportions and can be plotted and/or used for a hypothesis test of whether the proportions have increased over the years.
     '''
-    def __init__(self, data, title='untitled', startcol=1980, end_year = 2017):
+    def __init__(self, data, title='untitled', startcol=1980, end_year = 2017, generate_csv = False):
         '''
         Parameters:
         data(pandas DataFrame): Electrical Energy Generation dataframe
@@ -19,11 +19,12 @@ class Analysis(object):
         self.data = data.drop(range(1980, startcol), axis=1)
         self.start_year = startcol
         self.end_year = end_year
+        self.generate_csv = generate_csv
         self.year = data.columns[(startcol-1978):]
         self.title = title
         self.analyze_list = []
         self.countries_analyzed = []
-
+        
     def show_countries(self, for_analysis='T'):
         '''
             Parameters:
@@ -66,6 +67,8 @@ class Analysis(object):
                 self.year[-1], ascending=False, inplace=True)
         self.analyze_list = self.propDF.to_numpy()
         self.countries_analyzed = list(self.propDF.index)
+        if self.generate_csv == True:
+            self.propDF.to_csv('data/{}.csv'.format(self.title.replace(' ', '_')))
         return self.propDF
 
     def plot_data(self, figsize=(14, 8), maxlines=10, include_world=False, include_legend=True):

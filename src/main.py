@@ -24,7 +24,7 @@ if __name__ == '__main__':
     cont_data = continent_data_import()
 
     Worldwide_Analysis = Analysis(energy_data, title='Worldwide')
-    Development_Analysis = Analysis(energy_data, title='Top Developed Countries')
+    Development_Analysis = Analysis(energy_data, title='Top Developed Countries', generate_csv = False)
     Development_Analysis.add_countries(developed_countries[:countries_to_analyze], orderby_latest = False)
     Development_Analysis.hypo_test()
     print('------------------------------------------')
