@@ -112,16 +112,7 @@ I plotted the countries with the top 20 highest proportions in 2017 on this map.
 
 Shown below is an image link to a visualization showing how the countries of the world have changed in the percentage of electricity generated from renewable resources from 1980 to 2017.
 
-<div class='tableauPlaceholder' id='viz1595278877501' style='position: relative'><noscript><a href='#'><img alt=' ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Pe&#47;PercentofRenweableElectricityOverYears&#47;Dashboard1&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='path' value='views&#47;PercentofRenweableElectricityOverYears&#47;Dashboard1?:language=en&amp;:embed=y&amp;:display_count=y&amp;publish=yes' /> <param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Pe&#47;PercentofRenweableElectricityOverYears&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en' /><param name='filter' value='publish=yes' /></object></div>
-
-<iframe src="https://public.tableau.com/views/public_exercise/Dashboard1?:showVizHome=no&:embed=true"
- width="645" height="955"></iframe>
-
- <iframe src="https://public.tableau.com/views/PercentofRenweableElectricityOverYears/Dashboard1?:language=en&:display_count=y&publish=yes&:origin=viz_share_link"
- width="645" height="955"></iframe>
-
- <iframe src="PercentofRenweableElectricityOverYears/Dashboard1?:showVizHome=no&:embed=true"
- width="645" height="955"></iframe>
+<div class='tableauPlaceholder' id='viz1595278877501' style='position: relative'><noscript><a href='#'><img alt=' ' src='https://public.tableau.com/views/PercentofRenweableElectricityOverYears/Dashboard1?:language=en&:display_count=y&publish=yes&:origin=viz_share_link' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='path' value='views&#47;PercentofRenweableElectricityOverYears&#47;Dashboard1?:language=en&amp;:embed=y&amp;:display_count=y&amp;publish=yes' /> <param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Pe&#47;PercentofRenweableElectricityOverYears&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en' /><param name='filter' value='publish=yes' /></object></div>
 
 https://public.tableau.com/views/PercentofRenweableElectricityOverYears/Dashboard1?:language=en&:display_count=y&publish=yes&:origin=viz_share_link
 
