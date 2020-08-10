@@ -112,10 +112,8 @@ I plotted the countries with the top 20 highest proportions in 2017 on this map.
 
 Shown below is a link to a Tableau visualization showing how the countries of the world have changed in the percentage of electricity generated from renewable resources from 1980 to 2017.
 
-[Percentage of Renewable Electricity From 1980 to 2017](https://public.tableau.com/views/RenewableElectricityGenerationOvertheYears/YearlyAnimationDashboard?:language=en&:display_count=y&:origin=viz_share_link)
-
-
-
+<a href="https://public.tableau.com/views/RenewableElectricityGenerationOvertheYears/YearlyAnimationDashboard?:language=en&:display_count=y&:origin=viz_share_link">
+<img border="0" alt="Percentage of Renewable Electricity From 1980 to 2017" src="images/YearlyAnimation.png"></a>
 
 # Conclusion
 
