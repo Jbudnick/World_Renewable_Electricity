@@ -114,6 +114,9 @@ Shown below is a link to a Tableau visualization showing how the countries of th
 
 <a href="https://public.tableau.com/views/RenewableElectricityGenerationOvertheYears/YearlyAnimationDashboard?:language=en&:display_count=y&:origin=viz_share_link">
 <img border="0" alt="Percentage of Renewable Electricity From 1980 to 2017" src="images/YearlyAnimation.png"></a>
+<a href="https://public.tableau.com/views/RenewableElectricityGenerationOvertheYears/YearlyAnimationDashboard?:language=en&:display_count=y&:origin=viz_share_link"> Renewable Electricity Generation</a>
+<br>
+<br>
 
 # Conclusion
 
